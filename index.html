@@ -100,8 +100,8 @@ button, input, textarea{ font:inherit; color:inherit; }
   transition: opacity 1.2s ease;
   animation: sway var(--sway) ease-in-out infinite alternate;
 }
-.petal:nth-child(7n) > i{ background: linear-gradient(135deg,#fff0d2 0%,#efcd8d 55%,#dcae61 100%); }
-.petal:nth-child(5n) > i{ background: linear-gradient(135deg,#fff3ea 0%,#ffd3b6 60%,#f7b995 100%); }
+.petal:nth-child(9n) > i{ background: linear-gradient(135deg,#fff0d2 0%,#efcd8d 55%,#dcae61 100%); }
+.petal:nth-child(11n) > i{ background: linear-gradient(135deg,#fff3ea 0%,#ffd3b6 60%,#f7b995 100%); }
 /* diradamento: metà petali svaniscono, gli altri restano */
 #petals.is-soft .petal:nth-child(2n) > i{ opacity:0; }
 
@@ -410,6 +410,27 @@ button, input, textarea{ font:inherit; color:inherit; }
 }
 @keyframes spin{ to{ transform: rotate(360deg) } }
 
+/* --- le chip dei quattro tile --- */
+.intro{ margin:0 0 18px; font-size:15px; line-height:1.5; color: var(--testo-2); }
+.chips{ position:relative; border:0; margin:0 0 16px; padding:0; min-width:0; }
+.chips legend{ padding:0; margin-bottom:9px; font-size:13px; letter-spacing:.05em; color: var(--testo-2); }
+.chip-in{ position:absolute; opacity:0; width:1px; height:1px; pointer-events:none; }
+.chip{
+  display:inline-block; margin:0 8px 8px 0; padding:9px 14px;
+  border-radius:999px; cursor:pointer;
+  background: rgba(255,255,255,.66);
+  box-shadow: inset 0 0 0 1px rgba(214,150,150,.3);
+  font-size:14.5px; line-height:1.2;
+  transition: background .2s ease, box-shadow .2s ease, transform .18s var(--ease), color .2s ease;
+}
+.chip:active{ transform: scale(.95); }
+.chip-in:checked + .chip{
+  background: linear-gradient(135deg, var(--rosa), var(--pesca));
+  color:#5c2f34; font-weight:600;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.5), 0 4px 12px rgba(214,120,124,.25);
+}
+.chip-in:focus-visible + .chip{ box-shadow: inset 0 0 0 2px var(--rosa-sc); }
+
 /* --- scena 5 --- */
 .seal-big{
   width:70px; height:70px; margin:0 auto 22px;
@@ -432,6 +453,34 @@ button, input, textarea{ font:inherit; color:inherit; }
   background: linear-gradient(120deg, #b04b55, #bd8228);
   -webkit-background-clip:text; background-clip:text; color:transparent;
 }
+
+/* --- il gattino della fine --- */
+.catfin-wrap{
+  margin-top:26px;
+  opacity:0; transform: translate3d(0,16px,0);
+  transition: opacity 1.2s ease, transform 1.2s var(--ease);
+}
+.catfin-wrap.is-in{ opacity:1; transform:none; }
+.catfin{
+  display:block; margin:0 auto; padding:0; border:0; background:none; cursor:pointer;
+  color: rgba(122,72,80,.6);
+  transition: transform .55s var(--ease), color .45s ease;
+}
+.catfin.is-fleeing{ transition: transform .4s cubic-bezier(.3,-.25,.4,1.35); }
+.cf-tail{ transform-origin: 104px 100px; animation: cftail 3.1s ease-in-out infinite alternate; }
+@keyframes cftail{ from{ transform: rotate(-9deg) } to{ transform: rotate(15deg) } }
+.cf-eyes-happy{ opacity:0; }
+.catfin-wrap.is-purring .cf-eyes-open{ opacity:0; }
+.catfin-wrap.is-purring .cf-eyes-happy{ opacity:1; }
+.catfin-wrap.is-purring .catfin{ color: rgba(122,72,80,.82); animation: purr 1.05s ease-in-out infinite; }
+.catfin-wrap.is-purring .cf-tail{ animation-duration:1.5s; }
+@keyframes purr{ 0%,100%{ transform: scale(1) } 50%{ transform: scale(1.04) } }
+.catfin-say{
+  min-height:20px; margin:14px 0 0;
+  font-size:14px; letter-spacing:.12em; color: var(--testo-2);
+  opacity:0; transition: opacity .35s ease;
+}
+.catfin-say.is-on{ opacity:1; }
 
 /* --- avviso di configurazione: lo vede solo Meme finché l'endpoint è vuoto --- */
 #cfgWarn{
@@ -463,6 +512,9 @@ button, input, textarea{ font:inherit; color:inherit; }
   .env__flap, .env__paper{ transition-duration:.01s !important; }
   .final{ transform:none !important; }
   .letter .btn{ transition-delay:.25s !important; }
+  .cf-tail{ animation:none !important; }
+  .catfin-wrap.is-purring .catfin{ animation:none !important; }
+  .catfin-wrap{ transform:none !important; }
 }
 </style>
 </head>
@@ -551,19 +603,19 @@ button, input, textarea{ font:inherit; color:inherit; }
       <h2 class="h2">Adesso scegli tu.<br><span class="soft">Una sola, eh.</span></h2>
 
       <div class="tiles" id="tiles">
-        <button class="tile" type="button" data-choice="Una serata fuori" data-desc="cena insieme">
+        <button class="tile" type="button" data-key="serata" data-choice="Una serata fuori" data-desc="cena insieme">
           <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a2.5 2.5 0 0 0 5 0V3M8.5 10v11"/><path d="M17.5 3c-1.4 1.4-2 3.2-2 5.2 0 1.6.7 2.8 2 2.8V3zM17.5 11v10"/></svg></span>
           <span class="t">Una serata fuori</span><span class="d">cena insieme</span>
         </button>
-        <button class="tile" type="button" data-choice="Un appuntamento con me" data-desc="pomeriggio a sorpresa">
+        <button class="tile" type="button" data-key="appuntamento" data-choice="Un appuntamento con me" data-desc="pomeriggio a sorpresa">
           <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/></svg></span>
           <span class="t">Un appuntamento con me</span><span class="d">pomeriggio a sorpresa</span>
         </button>
-        <button class="tile" type="button" data-choice="Un viaggio" data-desc="una fuga fuori città">
+        <button class="tile" type="button" data-key="viaggio" data-choice="Un viaggio" data-desc="una fuga fuori città">
           <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13.5l3-1 4.5 1.6 3.5-1.2-5-6.3 2-.7 6.4 5.4 3.1-1.1a1.7 1.7 0 1 1 1.1 3.2L5 17.8z"/><path d="M3 21h18"/></svg></span>
           <span class="t">Un viaggio</span><span class="d">una fuga fuori città</span>
         </button>
-        <button class="tile" type="button" data-choice="Sorprendimi tu" data-desc="campo libero">
+        <button class="tile" type="button" data-key="sorpresa" data-choice="Sorprendimi tu" data-desc="campo libero">
           <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg></span>
           <span class="t">Sorprendimi tu</span><span class="d">campo libero</span>
         </button>
@@ -574,9 +626,11 @@ button, input, textarea{ font:inherit; color:inherit; }
           <b id="chosenTitle"></b>
           <button class="btn btn--ghost" type="button" id="backBtn">cambia</button>
         </div>
+        <p class="intro" id="formIntro"></p>
+        <div id="extraFields"></div>
         <div class="row">
-          <label class="field"><span>Che giorno</span><input type="date" id="fDate" required></label>
-          <label class="field"><span>Che ora</span><input type="time" id="fTime" required></label>
+          <label class="field"><span id="labDate">Che giorno</span><input type="date" id="fDate" required></label>
+          <label class="field"><span id="labTime">Che ora</span><input type="time" id="fTime" required></label>
         </div>
         <label class="field">
           <span>Vuoi dirmi qualcosa?</span>
@@ -597,6 +651,27 @@ button, input, textarea{ font:inherit; color:inherit; }
       </div>
       <h2 class="h2">Ricevuto, amo.<br><span class="soft">Ci penso io.</span></h2>
       <p class="final" id="final"></p>
+
+      <div class="catfin-wrap" id="catFinWrap" hidden>
+        <button class="catfin" id="catFin" type="button" aria-label="Tocca il gattino">
+          <svg viewBox="0 0 140 132" width="134" height="126" aria-hidden="true">
+            <path class="cf-tail" d="M104 100c28 0 26-34 8-40" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+            <path d="M40 64h60c11 0 20 9 20 20v14c0 8-6 14-14 14H34c-8 0-14-6-14-14V84c0-11 9-20 20-20z" fill="currentColor"/>
+            <path d="M44 32l-5-23 22 11z" fill="currentColor"/>
+            <path d="M96 32l5-23-22 11z" fill="currentColor"/>
+            <g stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".5">
+              <path d="M42 52H24M42 59l-17 5M98 52h18M98 59l17 5"/>
+            </g>
+            <circle cx="70" cy="51" r="29" fill="currentColor"/>
+            <g class="cf-eyes-open" fill="#fff6ef"><circle cx="59" cy="49" r="4"/><circle cx="81" cy="49" r="4"/></g>
+            <g class="cf-eyes-happy" fill="none" stroke="#fff6ef" stroke-width="3.6" stroke-linecap="round">
+              <path d="M53.5 51q5.5-7 11 0"/><path d="M75.5 51q5.5-7 11 0"/>
+            </g>
+            <path d="M70 60l-4.2-4.2h8.4z" fill="#fff6ef" opacity=".85"/>
+          </svg>
+        </button>
+        <p class="catfin-say" id="catSay"></p>
+      </div>
     </div>
   </section>
 
@@ -615,7 +690,7 @@ button, input, textarea{ font:inherit; color:inherit; }
    es.  "https://formspree.io/f/abcdwxyz"
    (funziona anche con qualsiasi endpoint che accetti un POST JSON) */
 
-const FORM_ENDPOINT = "";
+const FORM_ENDPOINT = "https://formspree.io/f/mgaedyqk";
 
 /* Data di inizio (AAAA-MM-GG). Tutto il resto è calcolato da qui. */
 const DATA_INIZIO = "2022-10-11";
@@ -689,7 +764,7 @@ function makePetal(fast){
   return p;
 }
 (function initPetals(){
-  const n = RM ? 8 : (MOBILE ? 26 : 38);
+  const n = RM ? 8 : (MOBILE ? 24 : 38);
   const frag = document.createDocumentFragment();
   for(let i=0;i<n;i++) frag.appendChild(makePetal(false));
   petalsBox.appendChild(frag);
@@ -701,12 +776,13 @@ function petalsBurst(){
   petalsBox.classList.remove("is-soft");
   petalsBox.classList.add("is-burst");
   const frag = document.createDocumentFragment();
-  for(let i=0;i<18;i++) frag.appendChild(makePetal(true));
+  for(let i=0;i<18;i++) frag.appendChild(makePetal(true));   // il momento di pioggia
   burstBox.appendChild(frag);
-  setTimeout(function(){
-    burstBox.innerHTML = "";
-    petalsBox.classList.remove("is-burst");
-  }, 8500);
+  // e poi qualcuno resta a cadere, per sempre, intorno al gattino
+  const keep = document.createDocumentFragment();
+  for(let i=0, k = MOBILE ? 9 : 14; i<k; i++) keep.appendChild(makePetal(false));
+  petalsBox.appendChild(keep);
+  setTimeout(function(){ burstBox.innerHTML = ""; }, 8500);
 }
 
 /* ------------------------------------------------------------
@@ -823,8 +899,36 @@ const Music = (function(){
     try{ document.hidden ? ctx.suspend() : ctx.resume(); }catch(e){}
   });
 
+  /* le fusa: rumore filtrato basso + tremolo, niente riverbero (deve stare vicino) */
+  function purr(){
+    if(!ok || !on || muted || !ctx) return;
+    try{
+      const t = ctx.currentTime, D = 2.0;
+      const len = Math.floor(ctx.sampleRate * D);
+      const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      let last = 0;
+      for(let i=0;i<len;i++){ const w = Math.random()*2-1; last = (last + 0.02*w)/1.02; d[i] = last*3.2; }
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 270; lp.Q.value = .7;
+      const amp = ctx.createGain(); amp.gain.value = 0.5;
+      const lfo = ctx.createOscillator(); lfo.type = "sine"; lfo.frequency.value = 26;
+      const lfoG = ctx.createGain(); lfoG.gain.value = 0.5;
+      lfo.connect(lfoG); lfoG.connect(amp.gain);
+      const env = ctx.createGain();
+      env.gain.setValueAtTime(0.0001, t);
+      env.gain.linearRampToValueAtTime(0.9, t + 0.3);
+      env.gain.setValueAtTime(0.9, t + D - 0.6);
+      env.gain.linearRampToValueAtTime(0.0001, t + D);
+      src.connect(lp); lp.connect(amp); amp.connect(env); env.connect(dry);
+      src.start(t); src.stop(t + D);
+      lfo.start(t); lfo.stop(t + D);
+    }catch(e){}
+  }
+
   return {
     start: start,
+    purr: purr,
     toggle: toggle,
     isMuted: function(){ return muted; },
     available: function(){ return ok; }
@@ -868,8 +972,15 @@ $$("[data-next]").forEach(function(b){
 
 function onScene(n){
   petalsSoft(n === 3);
+  catHint.classList.remove("is-on");     // mai a cavallo di due scene
   if(n === 2){ startCounter(); showCatHint(); }
-  if(n === 5){ petalsBurst(); showFinal(); }
+  if(n === 5){
+    catOff = true;                       // nella scena finale comanda il gattino grande
+    cat.classList.remove("is-on");
+    catHint.classList.remove("is-on");
+    petalsBurst();
+    showFinal();
+  }
   layoutCat();
 }
 
@@ -943,6 +1054,40 @@ envBtn.addEventListener("click", function(){
 /* ------------------------------------------------------------
    SCENA 4 — i tile e il mini form
    ------------------------------------------------------------ */
+/* Ogni tile ha la sua testa: intro, etichette e domande sue. */
+const OPZIONI = {
+  serata: {
+    intro: "Al posto ci penso io. Tu dimmi solo che fame hai.",
+    labDate: "Che sera", labTime: "A che ora",
+    msg: "tipo: non troppo tardi che lavoro",
+    extra: [{ id:"fame", label:"Che fame abbiamo?",
+              opts:["Pizza","Sushi","Qualcosa di carino","Scegli tu"] }]
+  },
+  appuntamento: {
+    intro: "Dove andiamo non te lo dico. Dimmi solo quando sei libera.",
+    labDate: "Che giorno", labTime: "Ti passo a prendere alle",
+    msg: "tipo: comoda o vestita bene?",
+    extra: [{ id:"durata", label:"Quanto tempo ho?",
+              opts:["Un paio d'ore","Tutto il pomeriggio","Fino a sera","Decidi tu"] }]
+  },
+  viaggio: {
+    intro: "Fuori città, e si torna quando ci pare.",
+    labDate: "Si parte il", labTime: "Verso le",
+    msg: "tipo: niente sveglie all'alba",
+    extra: [
+      { id:"quanto", label:"Quanto stiamo fuori?", opts:["Una notte","Un weekend","Tre giorni buoni"] },
+      { id:"dove",   label:"Che aria tira?",       opts:["Mare","Montagna","Una città","Sorprendimi"] }
+    ]
+  },
+  sorpresa: {
+    intro: "Campo libero, va bene. Ma un giorno me lo devi dire.",
+    labDate: "Che giorno", labTime: "A che ora",
+    msg: "scrivi quello che vuoi, o anche niente",
+    extra: [{ id:"esagerare", label:"Quanto posso esagerare?",
+              opts:["Poco","Il giusto","Esagera","Fai tu"] }]
+  }
+};
+
 const tiles   = $("#tiles");
 const form    = $("#form");
 const errBox  = $("#err");
@@ -958,11 +1103,47 @@ let choice = null, fails = 0;
   fDate.min = t.getFullYear() + "-" + String(t.getMonth()+1).padStart(2,"0") + "-" + String(t.getDate()).padStart(2,"0");
 })();
 
+function buildForm(cfg){
+  $("#formIntro").textContent = cfg.intro;
+  $("#labDate").textContent   = cfg.labDate;
+  $("#labTime").textContent   = cfg.labTime;
+  fMsg.placeholder            = cfg.msg;
+
+  const box = $("#extraFields");
+  box.innerHTML = "";
+  cfg.extra.forEach(function(g){
+    const fs = document.createElement("fieldset");
+    fs.className = "chips";
+    const lg = document.createElement("legend");
+    lg.textContent = g.label;
+    fs.appendChild(lg);
+    g.opts.forEach(function(o,i){
+      const id = "x_" + g.id + "_" + i;
+      const inp = document.createElement("input");
+      inp.type = "radio"; inp.name = g.id; inp.id = id; inp.value = o; inp.className = "chip-in";
+      const lab = document.createElement("label");
+      lab.className = "chip"; lab.setAttribute("for", id); lab.textContent = o;
+      fs.appendChild(inp); fs.appendChild(lab);
+    });
+    box.appendChild(fs);
+  });
+}
+
+function extras(){
+  const out = {};
+  (OPZIONI[choice.key] || { extra: [] }).extra.forEach(function(g){
+    const sel = form.querySelector('input[name="' + g.id + '"]:checked');
+    out[g.label] = sel ? sel.value : "(non detto)";
+  });
+  return out;
+}
+
 $$(".tile", tiles).forEach(function(tile){
   tile.addEventListener("click", function(){
-    choice = { titolo: tile.dataset.choice, desc: tile.dataset.desc };
+    choice = { key: tile.dataset.key, titolo: tile.dataset.choice, desc: tile.dataset.desc };
     $$(".tile", tiles).forEach(function(o){ if(o !== tile) o.classList.add("is-dim"); });
     $("#chosenTitle").textContent = choice.titolo;
+    buildForm(OPZIONI[choice.key]);
 
     setTimeout(function(){
       tiles.classList.add("is-collapsed");
@@ -1003,14 +1184,14 @@ function itDate(iso){
 }
 
 function payload(){
-  return {
+  return Object.assign({
     scelta:    choice.titolo,
     dettaglio: choice.desc,
     giorno:    itDate(fDate.value),
     ora:       fTime.value,
     messaggio: fMsg.value.trim() || "(niente)",
     _subject:  "Sofia ha scelto: " + choice.titolo + " — " + itDate(fDate.value) + " alle " + fTime.value
-  };
+  }, extras());
 }
 
 function save(data){
@@ -1074,8 +1255,55 @@ function send(data){
 }
 
 /* ------------------------------------------------------------
-   SCENA 5 — il countdown finale
+   SCENA 5 — il countdown finale e il gattino
    ------------------------------------------------------------ */
+function buzz(pattern){
+  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
+}
+
+const catFinWrap = $("#catFinWrap");
+const catFin     = $("#catFin");
+const catSay     = $("#catSay");
+let pets = 0, purring = false, fleeTimer = null, sayTimer = null;
+
+function say(txt, ms){
+  catSay.textContent = txt;
+  catSay.classList.add("is-on");
+  clearTimeout(sayTimer);
+  sayTimer = setTimeout(function(){ catSay.classList.remove("is-on"); }, ms || 2600);
+}
+
+catFin.addEventListener("click", function(){
+  if(purring){                                  // ormai si è affezionato
+    say("mrrr mrrr");
+    buzz([26,55,26]);
+    Music.purr();
+    return;
+  }
+  pets++;
+  if(pets < 3){                                 // le prime due volte scappa
+    const dx = (pets % 2 ? 1 : -1) * (RM ? 24 : 64);
+    catFin.classList.add("is-fleeing");
+    catFin.style.transform = "translate3d(" + dx + "px," + (RM ? 0 : -14) + "px,0) rotate(" + (dx > 0 ? 7 : -7) + "deg)";
+    say(pets === 1 ? "eh no" : "quasi");
+    buzz(12);
+    clearTimeout(fleeTimer);
+    fleeTimer = setTimeout(function(){
+      catFin.style.transform = "";
+      catFin.classList.remove("is-fleeing");
+    }, RM ? 240 : 900);
+  }else{                                        // alla terza si arrende
+    purring = true;
+    clearTimeout(fleeTimer);
+    catFin.style.transform = "";
+    catFin.classList.remove("is-fleeing");
+    catFinWrap.classList.add("is-purring");
+    say("mrrr mrrr");
+    buzz([30,60,30,60,45]);
+    Music.purr();
+  }
+});
+
 const finalEl = $("#final");
 function showFinal(){
   const anni = num2word(ANNI_N);
@@ -1092,6 +1320,15 @@ function showFinal(){
   requestAnimationFrame(function(){
     setTimeout(function(){ finalEl.classList.add("is-in"); }, RM ? 60 : 900);
   });
+  setTimeout(function(){
+    catFinWrap.hidden = false;
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        catFinWrap.classList.add("is-in");
+        say("toccalo", 5200);
+      });
+    });
+  }, RM ? 220 : 2300);
 }
 
 /* ------------------------------------------------------------
@@ -1104,7 +1341,7 @@ const catHint = $("#catHint");
 const CAT_W = MOBILE ? 58 : 74, CAT_H = Math.round(CAT_W * 0.92);
 cat.setAttribute("width", CAT_W); cat.setAttribute("height", CAT_H);
 
-let cx = 0, cy = 0, dir = 1, lastFlee = 0, idleTimer = null, hintShown = false;
+let cx = 0, cy = 0, dir = 1, lastFlee = 0, idleTimer = null, hintShown = false, catOff = false;
 let bounds = { x0:0, x1:0, y0:0, y1:0 };
 
 function computeBounds(){
@@ -1139,12 +1376,12 @@ function place(x,y){
       const ay = Math.min(bounds.y1, Math.max(bounds.y0, alts[i][1]));
       if(free(ax,ay)){ hit = [ax,ay]; break; }
     }
-    if(!hit){ cat.classList.remove("is-on"); return; }
+    if(!hit){ cat.classList.remove("is-on"); catHint.classList.remove("is-on"); return; }
     x = hit[0]; y = hit[1];
   }
   cx = x; cy = y;
   cat.style.transform = "translate3d(" + Math.round(cx) + "px," + Math.round(cy) + "px,0) scaleX(" + dir + ")";
-  if(current >= 2) cat.classList.add("is-on");
+  if(current >= 2 && !catOff) cat.classList.add("is-on");
   if(catHint.classList.contains("is-on")) positionHint();
 }
 function layoutCat(){ computeBounds(); place(cx, cy); }
