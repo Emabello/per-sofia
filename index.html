@@ -412,6 +412,14 @@ button, input, textarea{ font:inherit; color:inherit; }
 
 /* --- le chip dei quattro tile --- */
 .intro{ margin:0 0 18px; font-size:15px; line-height:1.5; color: var(--testo-2); }
+.maps{
+  display:inline-flex; align-items:center; gap:5px;
+  margin:-8px 0 16px; padding:6px 11px; border-radius:999px;
+  background: rgba(255,255,255,.55); box-shadow: inset 0 0 0 1px rgba(214,150,150,.28);
+  font-size:12.5px; color: var(--testo-2); text-decoration:none;
+  transition: background .2s ease, color .2s ease;
+}
+.maps:active{ background: rgba(255,255,255,.8); }
 .chips{ position:relative; border:0; margin:0 0 16px; padding:0; min-width:0; }
 .chips legend{ padding:0; margin-bottom:9px; font-size:13px; letter-spacing:.05em; color: var(--testo-2); }
 .chip-in{ position:absolute; opacity:0; width:1px; height:1px; pointer-events:none; }
@@ -454,33 +462,146 @@ button, input, textarea{ font:inherit; color:inherit; }
   -webkit-background-clip:text; background-clip:text; color:transparent;
 }
 
-/* --- il gattino della fine --- */
-.catfin-wrap{
-  margin-top:26px;
-  opacity:0; transform: translate3d(0,16px,0);
-  transition: opacity 1.2s ease, transform 1.2s var(--ease);
+/* ============================================================
+   7. IL GATTINO E IL SUO GIOCO
+   ============================================================ */
+
+/* --- il disegno --- */
+.kitty{ display:block; width:100%; height:auto; overflow:visible; }
+.k-tail{ transform-origin:118px 132px; animation: ktail var(--tail,3.2s) ease-in-out infinite alternate; }
+@keyframes ktail{ from{ transform: rotate(-10deg) } to{ transform: rotate(16deg) } }
+.k-ear-l{ transform-origin:62px 46px; transition: transform .3s var(--ease); }
+.k-ear-r{ transform-origin:114px 46px; transition: transform .3s var(--ease); }
+.is-alert .k-ear-l{ transform: rotate(-13deg); }
+.is-alert .k-ear-r{ transform: rotate(13deg); }
+.k-lid{ transform-origin:50% 0%; transform: scaleY(0); transition: transform .09s ease; }
+.is-blink .k-lid{ transform: scaleY(1); }
+.k-eyes-happy{ opacity:0; transition: opacity .18s ease; }
+.is-purring .k-eyes-happy, .is-eating .k-eyes-happy{ opacity:1; }
+.is-purring .k-eyes, .is-eating .k-eyes{ opacity:0; }
+.k-eyes{ transition: opacity .18s ease; }
+.k-pupil{ transition: transform .18s ease-out; }
+.k-head{ transform-origin:88px 92px; transition: transform .3s var(--ease); }
+.is-eating .k-head{ animation: kchew .34s ease-in-out infinite alternate; }
+@keyframes kchew{ from{ transform: translateY(4px) rotate(-2deg) } to{ transform: translateY(9px) rotate(2deg) } }
+.is-purring .k-tail{ --tail:1.4s; }
+.is-walking .k-paw-l{ animation: kpaw .26s ease-in-out infinite alternate; }
+.is-walking .k-paw-r{ animation: kpaw .26s ease-in-out infinite alternate reverse; }
+@keyframes kpaw{ from{ transform: translateY(0) } to{ transform: translateY(-5px) } }
+
+/* --- il gattino accanto al pulsante --- */
+.catcall{ display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; }
+.catcall__cat{ display:block; width:74px; flex:none; cursor:pointer; animation: peek 3.4s ease-in-out infinite; }
+@keyframes peek{ 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-5px) } }
+.btn--cat{ margin-top:0; min-height:46px; padding:0 22px; font-size:15px; }
+
+/* --- il pop-up --- */
+.game{ position:fixed; inset:0; z-index:25; }
+.game__scrim{ position:absolute; inset:0; background: rgba(255,243,234,.32); }
+.game__panel{
+  position:absolute;
+  left: clamp(14px, 4vw, 34px); right: clamp(14px, 4vw, 34px);
+  top: calc(clamp(46px, 9vh, 88px) + env(safe-area-inset-top));
+  bottom: calc(clamp(46px, 9vh, 88px) + env(safe-area-inset-bottom));
+  max-width:620px; margin-inline:auto;
+  display:flex; flex-direction:column; gap:10px;
+  padding:14px 15px;
+  border-radius:26px;
+  /* niente blur: i petali dello sfondo devono restare nitidi */
+  background: rgba(255,251,246,.34);
+  box-shadow: 0 24px 64px rgba(170,95,100,.22), inset 0 0 0 1px rgba(255,255,255,.75);
 }
-.catfin-wrap.is-in{ opacity:1; transform:none; }
-.catfin{
-  display:block; margin:0 auto; padding:0; border:0; background:none; cursor:pointer;
-  color: rgba(122,72,80,.6);
-  transition: transform .55s var(--ease), color .45s ease;
+.game__top{ display:flex; align-items:center; gap:8px; flex:none; }
+.game__top h3{
+  flex:1; margin:0;
+  font-family: ui-serif, Georgia, "Iowan Old Style", Palatino, serif;
+  font-weight:400; font-size:19px; letter-spacing:.01em;
 }
-.catfin.is-fleeing{ transition: transform .4s cubic-bezier(.3,-.25,.4,1.35); }
-.cf-tail{ transform-origin: 104px 100px; animation: cftail 3.1s ease-in-out infinite alternate; }
-@keyframes cftail{ from{ transform: rotate(-9deg) } to{ transform: rotate(15deg) } }
-.cf-eyes-happy{ opacity:0; }
-.catfin-wrap.is-purring .cf-eyes-open{ opacity:0; }
-.catfin-wrap.is-purring .cf-eyes-happy{ opacity:1; }
-.catfin-wrap.is-purring .catfin{ color: rgba(122,72,80,.82); animation: purr 1.05s ease-in-out infinite; }
-.catfin-wrap.is-purring .cf-tail{ animation-duration:1.5s; }
-@keyframes purr{ 0%,100%{ transform: scale(1) } 50%{ transform: scale(1.04) } }
-.catfin-say{
-  min-height:20px; margin:14px 0 0;
-  font-size:14px; letter-spacing:.12em; color: var(--testo-2);
-  opacity:0; transition: opacity .35s ease;
+.gbtn{
+  width:38px; height:38px; flex:none; padding:0;
+  display:grid; place-items:center; border:0; border-radius:50%;
+  background: rgba(255,255,255,.6); color: var(--testo-2); cursor:pointer;
+  transition: transform .18s var(--ease), background .2s ease;
 }
-.catfin-say.is-on{ opacity:1; }
+.gbtn:active{ transform: scale(.92); }
+.gbtn.is-muted .wave{ opacity:0; }
+.gbtn .slash{ opacity:0; }
+.gbtn.is-muted .slash{ opacity:1; }
+
+.meter{ display:flex; align-items:center; gap:10px; flex:none; }
+.meter__lab{ font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color: var(--testo-2); }
+.meter__bar{
+  flex:1; height:9px; border-radius:99px; overflow:hidden;
+  background: rgba(255,255,255,.6); box-shadow: inset 0 0 0 1px rgba(214,150,150,.28);
+}
+.meter__bar i{
+  display:block; height:100%; width:0%; border-radius:99px;
+  background: linear-gradient(90deg, var(--rosa-sc), var(--rosa), var(--oro-ch));
+  transition: width .5s var(--ease);
+}
+.game__say{ flex:none; margin:0; min-height:20px; font-size:14px; text-align:center; color: var(--testo-2); }
+.game__field{
+  flex:1; min-height:0; border-radius:20px;
+  background: rgba(255,255,255,.12);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.5);
+}
+.toys{ flex:none; display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
+.toy{
+  display:flex; flex-direction:column; align-items:center; gap:5px;
+  padding:10px 3px; border:0; border-radius:16px; cursor:pointer;
+  background: rgba(255,255,255,.55); box-shadow: inset 0 0 0 1px rgba(255,255,255,.65);
+  color: var(--testo-2); font-size:11px; line-height:1.15; text-align:center;
+  transition: background .2s ease, color .2s ease, transform .18s var(--ease), box-shadow .2s ease;
+}
+.toy:active{ transform: scale(.95); }
+.toy.is-on{
+  background: linear-gradient(140deg, var(--rosa), var(--pesca));
+  color:#5c2f34; font-weight:600;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.5), 0 6px 16px rgba(214,120,124,.28);
+}
+
+/* --- gli strati sopra il pannello --- */
+.game__petals, .game__items, .game__fx{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+.game__cat{
+  position:absolute; left:0; top:0; width:var(--kw,96px);
+  cursor:pointer; touch-action:none; will-change:transform;
+}
+.ty{
+  position:absolute; left:0; top:0; display:block;
+  opacity:0; transition: opacity .28s ease;
+  will-change: transform;
+}
+.ty.is-on{ opacity:1; }
+.ty-laser{
+  width:18px; height:18px; border-radius:50%;
+  background: radial-gradient(circle at 44% 38%, #fff 6%, #ff5f5f 52%, rgba(255,70,70,0) 74%);
+  animation: laserp .9s ease-in-out infinite alternate;
+}
+@keyframes laserp{
+  from{ filter: drop-shadow(0 0 4px rgba(255,72,72,.55)); }
+  to  { filter: drop-shadow(0 0 11px rgba(255,72,72,.95)); }
+}
+.ty-ball{ width:44px; }
+.ty-feather{ width:52px; }
+.ty-bowl{ width:60px; }
+.fx{
+  position:absolute; left:0; top:0;
+  font-size:13px; letter-spacing:.08em; white-space:nowrap;
+  color: var(--rosa-sc);
+  animation: fxup 1.35s ease-out forwards;
+}
+.fx svg{ display:block; }
+@keyframes fxup{
+  0%  { opacity:0; transform: translate(-50%,-50%) scale(.5); }
+  18% { opacity:1; transform: translate(-50%,-78%) scale(1); }
+  100%{ opacity:0; transform: translate(-50%,-210%) scale(1.05); }
+}
+body.is-playing #mute{ opacity:0; pointer-events:none; }
+
+@media (max-width: 359px){
+  .toy{ font-size:10px; padding:8px 2px; }
+  .game__top h3{ font-size:17px; }
+}
 
 /* --- avviso di configurazione: lo vede solo Meme finché l'endpoint è vuoto --- */
 #cfgWarn{
@@ -512,9 +633,10 @@ button, input, textarea{ font:inherit; color:inherit; }
   .env__flap, .env__paper{ transition-duration:.01s !important; }
   .final{ transform:none !important; }
   .letter .btn{ transition-delay:.25s !important; }
-  .cf-tail{ animation:none !important; }
-  .catfin-wrap.is-purring .catfin{ animation:none !important; }
   .catfin-wrap{ transform:none !important; }
+  .k-tail, .catcall__cat, .ty-laser{ animation:none !important; }
+  .is-walking .k-paw-l, .is-walking .k-paw-r, .is-eating .k-head{ animation:none !important; }
+  .fx{ animation-duration:.6s !important; }
 }
 </style>
 </head>
@@ -653,29 +775,97 @@ button, input, textarea{ font:inherit; color:inherit; }
       <p class="final" id="final"></p>
 
       <div class="catfin-wrap" id="catFinWrap" hidden>
-        <button class="catfin" id="catFin" type="button" aria-label="Tocca il gattino">
-          <svg viewBox="0 0 140 132" width="134" height="126" aria-hidden="true">
-            <path class="cf-tail" d="M104 100c28 0 26-34 8-40" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
-            <path d="M40 64h60c11 0 20 9 20 20v14c0 8-6 14-14 14H34c-8 0-14-6-14-14V84c0-11 9-20 20-20z" fill="currentColor"/>
-            <path d="M44 32l-5-23 22 11z" fill="currentColor"/>
-            <path d="M96 32l5-23-22 11z" fill="currentColor"/>
-            <g stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".5">
-              <path d="M42 52H24M42 59l-17 5M98 52h18M98 59l17 5"/>
-            </g>
-            <circle cx="70" cy="51" r="29" fill="currentColor"/>
-            <g class="cf-eyes-open" fill="#fff6ef"><circle cx="59" cy="49" r="4"/><circle cx="81" cy="49" r="4"/></g>
-            <g class="cf-eyes-happy" fill="none" stroke="#fff6ef" stroke-width="3.6" stroke-linecap="round">
-              <path d="M53.5 51q5.5-7 11 0"/><path d="M75.5 51q5.5-7 11 0"/>
-            </g>
-            <path d="M70 60l-4.2-4.2h8.4z" fill="#fff6ef" opacity=".85"/>
-          </svg>
-        </button>
+        <div class="catcall">
+          <span class="catcall__cat" id="catPeek" aria-hidden="true"></span>
+          <button class="btn btn--cat" id="openGame" type="button">clicca qui per il gattino</button>
+        </div>
         <p class="catfin-say" id="catSay"></p>
       </div>
     </div>
   </section>
 
 </main>
+
+<!-- ---------- il gioco del gattino ---------- -->
+<div class="game" id="game" hidden>
+  <div class="game__scrim"></div>
+
+  <div class="game__panel" id="gamePanel" role="dialog" aria-modal="true" aria-labelledby="gameTitle">
+    <div class="game__top">
+      <h3 id="gameTitle">Il gattino</h3>
+      <button class="gbtn" id="gameMute" type="button" aria-label="Attiva o disattiva la musica">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 9.5h3.2L12 5.5v13L7.2 14.5H4z" fill="currentColor" stroke="none"/>
+          <g class="wave"><path d="M15.6 9.2a4 4 0 0 1 0 5.6"/><path d="M18.2 6.8a7.5 7.5 0 0 1 0 10.4"/></g>
+          <g class="slash"><path d="M15.5 9.5l5 5M20.5 9.5l-5 5"/></g>
+        </svg>
+      </button>
+      <button class="gbtn" id="gameClose" type="button" aria-label="Chiudi il gioco">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="meter">
+      <span class="meter__lab">fusa</span>
+      <span class="meter__bar"><i id="meterFill"></i></span>
+    </div>
+
+    <p class="game__say" id="gameSay">Muovi il dito: ti viene dietro.</p>
+    <div class="game__field" id="gameField"></div>
+
+    <div class="toys" id="toys" role="group" aria-label="Giochi">
+      <button class="toy is-on" type="button" data-toy="laser">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="3.4" fill="currentColor" stroke="none"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
+        puntatore
+      </button>
+      <button class="toy" type="button" data-toy="gomitolo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.2"/><path d="M5.2 8.4c4 1.2 7.6 4 9.4 7.8M8.4 4.6c2.6 3.2 4.2 7.2 4.6 11.3M15.9 4.6C13.6 7 12 10 11.4 13.3M19.2 9.4c-2.6.9-5 2.6-6.7 4.9"/></svg>
+        gomitolo
+      </button>
+      <button class="toy" type="button" data-toy="piuma">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 3.5c-6 0-11 4.6-11 10.4v3.2l3.2-.2c5.6-.4 9.6-5 9.6-10.6z"/><path d="M4 20l6.5-6.5M9 15.5h3.6M11.8 12.6h3.4"/></svg>
+        piuma
+      </button>
+      <button class="toy" type="button" data-toy="cibo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 12.5h17.2a8.6 8.6 0 0 1-8.6 7.4 8.6 8.6 0 0 1-8.6-7.4z"/><circle cx="8.6" cy="8.4" r="1.9"/><circle cx="13.4" cy="6.8" r="1.9"/><circle cx="16.6" cy="9.9" r="1.9"/></svg>
+        crocchette
+      </button>
+    </div>
+  </div>
+
+  <div class="game__petals" id="gamePetals" aria-hidden="true"></div>
+
+  <div class="game__items" id="gameItems" aria-hidden="true">
+    <i class="ty ty-laser" id="tyLaser"></i>
+    <span class="ty ty-ball" id="tyBall">
+      <svg viewBox="0 0 44 44" aria-hidden="true">
+        <circle cx="22" cy="22" r="19" fill="#f2a8b6"/>
+        <g fill="none" stroke="#d9788d" stroke-width="2.2" stroke-linecap="round">
+          <path d="M6 15c9 2 17 8.5 21 17.5M11.5 6.5C17 13 20.6 21.4 21.5 30.5M28.5 5.6C23.6 10.9 20.4 17.6 19.3 24.8M38.5 17.6c-5.8 1.9-10.8 5.7-14.3 10.8"/>
+        </g>
+      </svg>
+    </span>
+    <span class="ty ty-feather" id="tyFeather">
+      <svg viewBox="0 0 52 52" aria-hidden="true">
+        <path d="M42 6c-13 0-23.5 10-23.5 22.5V35l6.8-.4C38.3 33.8 46 24 46 12.6V6z" fill="#ffd9a8" stroke="#e3b273" stroke-width="2"/>
+        <path d="M8 46l14-14" stroke="#c9926a" stroke-width="3" stroke-linecap="round"/>
+        <path d="M22 34h7M26 29h7M30.5 24h6" stroke="#e3b273" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="ty ty-bowl" id="tyBowl">
+      <svg viewBox="0 0 60 44" aria-hidden="true">
+        <g class="bowl-food">
+          <circle cx="22" cy="17" r="5" fill="#c98a56"/><circle cx="32" cy="14" r="5" fill="#b97a48"/><circle cx="39" cy="19" r="4.4" fill="#c98a56"/>
+        </g>
+        <path d="M6 20h48a24 24 0 0 1-24 20A24 24 0 0 1 6 20z" fill="#f3a8b6"/>
+        <ellipse cx="30" cy="20" rx="24" ry="5" fill="#ffd0da"/>
+      </svg>
+    </span>
+  </div>
+
+  <div class="game__cat" id="gameCat"></div>
+  <div class="game__fx" id="gameFx" aria-hidden="true"></div>
+</div>
 
 <div id="cfgWarn" hidden></div>
 
@@ -926,9 +1116,50 @@ const Music = (function(){
     }catch(e){}
   }
 
+  /* un mezzo miagolino */
+  function mew(){
+    if(!ok || !on || muted || !ctx) return;
+    try{
+      const t = ctx.currentTime;
+      const o = ctx.createOscillator(); o.type = "triangle";
+      o.frequency.setValueAtTime(660, t);
+      o.frequency.exponentialRampToValueAtTime(920, t + 0.09);
+      o.frequency.exponentialRampToValueAtTime(520, t + 0.34);
+      const f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 1100; f.Q.value = 1.4;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.16, t + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.38);
+      o.connect(f); f.connect(g); g.connect(dry); g.connect(wet);
+      o.start(t); o.stop(t + 0.42);
+    }catch(e){}
+  }
+
+  /* tre crocchette */
+  function crunch(){
+    if(!ok || !on || muted || !ctx) return;
+    try{
+      for(let i=0;i<3;i++){
+        const t = ctx.currentTime + i*0.17 + Math.random()*0.03;
+        const len = Math.floor(ctx.sampleRate * 0.08);
+        const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for(let j=0;j<len;j++) d[j] = (Math.random()*2-1) * Math.pow(1-j/len, 3);
+        const src = ctx.createBufferSource(); src.buffer = buf;
+        const bp = ctx.createBiquadFilter(); bp.type = "bandpass";
+        bp.frequency.value = 1500 + Math.random()*900; bp.Q.value = 1.1;
+        const g = ctx.createGain(); g.gain.value = 0.14;
+        src.connect(bp); bp.connect(g); g.connect(dry);
+        src.start(t); src.stop(t + 0.1);
+      }
+    }catch(e){}
+  }
+
   return {
     start: start,
     purr: purr,
+    mew: mew,
+    crunch: crunch,
     toggle: toggle,
     isMuted: function(){ return muted; },
     available: function(){ return ok; }
@@ -1060,6 +1291,7 @@ const OPZIONI = {
     intro: "Al posto ci penso io. Tu dimmi solo che fame hai.",
     labDate: "Che sera", labTime: "A che ora",
     msg: "tipo: non troppo tardi che lavoro",
+    posto: { id:"posto", label:"Un posto in mente?", ph:"il nome, o la zona" },
     extra: [{ id:"fame", label:"Che fame abbiamo?",
               opts:["Pizza","Sushi","Qualcosa di carino","Scegli tu"] }]
   },
@@ -1067,6 +1299,7 @@ const OPZIONI = {
     intro: "Dove andiamo non te lo dico. Dimmi solo quando sei libera.",
     labDate: "Che giorno", labTime: "Ti passo a prendere alle",
     msg: "tipo: comoda o vestita bene?",
+    posto: { id:"ritrovo", label:"Da dove ti passo a prendere?", ph:"casa tua, il lavoro…" },
     extra: [{ id:"durata", label:"Quanto tempo ho?",
               opts:["Un paio d'ore","Tutto il pomeriggio","Fino a sera","Decidi tu"] }]
   },
@@ -1074,6 +1307,10 @@ const OPZIONI = {
     intro: "Fuori città, e si torna quando ci pare.",
     labDate: "Si parte il", labTime: "Verso le",
     msg: "tipo: niente sveglie all'alba",
+    posto: { id:"meta", label:"Dove ti va di andare?", ph:"una città, o il mare",
+             list:["Bologna","Firenze","Verona","Siena","Lucca","Genova","Portofino","Cinque Terre",
+                   "Lago di Como","Lago di Garda","Dolomiti","Trieste","Torino","Venezia","Ravenna",
+                   "Urbino","Assisi","Matera","Napoli","Procida","Rimini","Perugia"] },
     extra: [
       { id:"quanto", label:"Quanto stiamo fuori?", opts:["Una notte","Un weekend","Tre giorni buoni"] },
       { id:"dove",   label:"Che aria tira?",       opts:["Mare","Montagna","Una città","Sorprendimi"] }
@@ -1127,14 +1364,57 @@ function buildForm(cfg){
     });
     box.appendChild(fs);
   });
+
+  if(cfg.posto){
+    const lab = document.createElement("label");
+    lab.className = "field";
+    const sp = document.createElement("span"); sp.textContent = cfg.posto.label;
+    const inp = document.createElement("input");
+    inp.type = "text"; inp.id = "fPosto"; inp.placeholder = cfg.posto.ph;
+    inp.maxLength = 120; inp.autocomplete = "off";
+    lab.appendChild(sp); lab.appendChild(inp);
+    box.appendChild(lab);
+
+    if(cfg.posto.list){
+      const dl = document.createElement("datalist");
+      dl.id = "postiList";
+      cfg.posto.list.forEach(function(v){
+        const o = document.createElement("option"); o.value = v; dl.appendChild(o);
+      });
+      box.appendChild(dl);
+      inp.setAttribute("list", "postiList");
+    }
+
+    // niente API, niente chiavi: è solo un link a una ricerca già pronta
+    const a = document.createElement("a");
+    a.className = "maps"; a.target = "_blank"; a.rel = "noopener noreferrer";
+    a.hidden = true;
+    a.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M20 10.5c0 5.5-8 11.5-8 11.5s-8-6-8-11.5a8 8 0 1 1 16 0z"/><circle cx="12" cy="10.2" r="2.8"/></svg>' +
+      '<span>cercalo su Maps</span>';
+    box.appendChild(a);
+
+    inp.addEventListener("input", function(){
+      const v = inp.value.trim();
+      a.hidden = v.length < 2;
+      if(!a.hidden) a.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(v);
+    });
+  }
 }
 
 function extras(){
   const out = {};
-  (OPZIONI[choice.key] || { extra: [] }).extra.forEach(function(g){
+  const cfg = OPZIONI[choice.key] || { extra: [] };
+  cfg.extra.forEach(function(g){
     const sel = form.querySelector('input[name="' + g.id + '"]:checked');
     out[g.label] = sel ? sel.value : "(non detto)";
   });
+  if(cfg.posto){
+    const el = $("#fPosto");
+    const v = el ? el.value.trim() : "";
+    out[cfg.posto.label] = v || "(non detto)";
+  }
   return out;
 }
 
@@ -1262,9 +1542,8 @@ function buzz(pattern){
 }
 
 const catFinWrap = $("#catFinWrap");
-const catFin     = $("#catFin");
 const catSay     = $("#catSay");
-let pets = 0, purring = false, fleeTimer = null, sayTimer = null;
+let sayTimer = null;
 
 function say(txt, ms){
   catSay.textContent = txt;
@@ -1273,36 +1552,469 @@ function say(txt, ms){
   sayTimer = setTimeout(function(){ catSay.classList.remove("is-on"); }, ms || 2600);
 }
 
-catFin.addEventListener("click", function(){
-  if(purring){                                  // ormai si è affezionato
-    say("mrrr mrrr");
-    buzz([26,55,26]);
-    Music.purr();
-    return;
+/* Il gattino, disegnato una volta sola e usato in due posti.
+   L'id del gradiente cambia per non avere due elementi con lo stesso id. */
+function kittySVG(sfx){
+  const g = "kfur-" + sfx;
+  return '<svg class="kitty" viewBox="0 0 180 168" aria-hidden="true">' +
+    '<defs><linearGradient id="' + g + '" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#fcd9b4"/><stop offset="1" stop-color="#eca66c"/>' +
+    '</linearGradient></defs>' +
+
+    '<g class="k-tail">' +
+      '<path d="M118 132c34 2 40-32 22-42" fill="none" stroke="#eca66c" stroke-width="13" stroke-linecap="round"/>' +
+      '<g stroke="#dd9459" stroke-width="4.6" stroke-linecap="round" fill="none">' +
+        '<path d="M140 96l9 5"/><path d="M147 111l10 2"/><path d="M146 125l9-3"/>' +
+      '</g>' +
+    '</g>' +
+
+    '<g class="k-body">' +
+      '<path d="M62 92c-19 0-34 15-34 33v8c0 8 6 14 14 14h96c8 0 14-6 14-14v-8c0-18-15-33-34-33z" fill="url(#' + g + ')"/>' +
+      '<ellipse cx="88" cy="130" rx="30" ry="14" fill="#fff4e8" opacity=".8"/>' +
+      '<ellipse class="k-paw k-paw-l" cx="66" cy="142" rx="14" ry="8" fill="#fff4e8"/>' +
+      '<ellipse class="k-paw k-paw-r" cx="110" cy="142" rx="14" ry="8" fill="#fff4e8"/>' +
+    '</g>' +
+
+    '<g class="k-head">' +
+      '<g class="k-ear-l"><path d="M54 46L45 12l35 18z" fill="url(#' + g + ')"/><path d="M57 41l-3-19 18 10z" fill="#f7b0b8"/></g>' +
+      '<g class="k-ear-r"><path d="M122 46l9-34-35 18z" fill="url(#' + g + ')"/><path d="M119 41l3-19-18 10z" fill="#f7b0b8"/></g>' +
+      '<ellipse cx="88" cy="62" rx="43" ry="39" fill="url(#' + g + ')"/>' +
+      '<g stroke="#dd9459" stroke-width="5" stroke-linecap="round" fill="none" opacity=".75">' +
+        '<path d="M74 26l-3 13"/><path d="M88 23v13"/><path d="M102 26l3 13"/>' +
+      '</g>' +
+      '<ellipse cx="88" cy="80" rx="25" ry="15" fill="#fff4e8"/>' +
+      '<g class="k-eyes">' +
+        '<ellipse cx="70" cy="60" rx="11" ry="12.5" fill="#fff"/>' +
+        '<ellipse cx="106" cy="60" rx="11" ry="12.5" fill="#fff"/>' +
+        '<g class="k-pupil"><ellipse cx="70" cy="60" rx="5.5" ry="9.5" fill="#3a2a26"/><circle cx="72.4" cy="55" r="2.4" fill="#fff"/></g>' +
+        '<g class="k-pupil"><ellipse cx="106" cy="60" rx="5.5" ry="9.5" fill="#3a2a26"/><circle cx="108.4" cy="55" r="2.4" fill="#fff"/></g>' +
+        '<rect class="k-lid" x="58" y="46" width="24" height="29" rx="7" fill="url(#' + g + ')"/>' +
+        '<rect class="k-lid" x="94" y="46" width="24" height="29" rx="7" fill="url(#' + g + ')"/>' +
+      '</g>' +
+      '<g class="k-eyes-happy" fill="none" stroke="#3a2a26" stroke-width="4" stroke-linecap="round">' +
+        '<path d="M62 63q8-9 16 0"/><path d="M98 63q8-9 16 0"/>' +
+      '</g>' +
+      '<path d="M88 74l-6.5-5.5h13z" fill="#f0929e"/>' +
+      '<path d="M88 78q-6.5 7-12.5 1M88 78q6.5 7 12.5 1" fill="none" stroke="#cf8f6f" stroke-width="3" stroke-linecap="round"/>' +
+      '<g stroke="#e9c9ab" stroke-width="2.6" stroke-linecap="round">' +
+        '<path d="M64 78H29M64 84l-33 8M112 78h35M112 84l33 8"/>' +
+      '</g>' +
+    '</g>' +
+  '</svg>';
+}
+
+$("#catPeek").innerHTML = kittySVG("p");
+
+/* ------------------------------------------------------------
+   IL GIOCO
+   ------------------------------------------------------------ */
+const Gioco = (function(){
+  const layer  = $("#game");
+  const panel  = $("#gamePanel");
+  const field  = $("#gameField");
+  const catEl  = $("#gameCat");
+  const fxEl   = $("#gameFx");
+  const sayEl  = $("#gameSay");
+  const fillEl = $("#meterFill");
+  const gPetals= $("#gamePetals");
+  const items  = {
+    laser:   $("#tyLaser"),
+    gomitolo:$("#tyBall"),
+    piuma:   $("#tyFeather"),
+    cibo:    $("#tyBowl")
+  };
+  const SIZE = { laser:18, gomitolo:44, piuma:52, cibo:60 };
+  const KW = MOBILE ? 112 : 140;
+  const KH = Math.round(KW * 168/180);
+
+  let aperto=false, raf=0, last=0, toy="laser", fusa=0, festa=false;
+  let blinkAt=0, lastSay=0, pupils=[], zoneUI=[];
+  const cat = { x:0, y:0, vx:0, vy:0, st:"idle", t:0, wx:0, wy:0, wait:0, trip:0, giri:0 };
+  const tgt = { x:0, y:0, on:false, kind:null };
+
+  const D = function(ax,ay,bx,by){ return Math.hypot(ax-bx, ay-by); };
+  const clamp = function(v,a,b){ return v<a?a:(v>b?b:v); };
+
+  /* --- confini: tutto lo schermo, così esce anche dal riquadro --- */
+  function bounds(){
+    const mx = KW*0.5 + 4, my = KH*0.5 + 4;
+    return { x0:mx, x1:Math.max(mx, window.innerWidth-mx),
+             y0:my, y1:Math.max(my, window.innerHeight-my) };
   }
-  pets++;
-  if(pets < 3){                                 // le prime due volte scappa
-    const dx = (pets % 2 ? 1 : -1) * (RM ? 24 : 64);
-    catFin.classList.add("is-fleeing");
-    catFin.style.transform = "translate3d(" + dx + "px," + (RM ? 0 : -14) + "px,0) rotate(" + (dx > 0 ? 7 : -7) + "deg)";
-    say(pets === 1 ? "eh no" : "quasi");
-    buzz(12);
-    clearTimeout(fleeTimer);
-    fleeTimer = setTimeout(function(){
-      catFin.style.transform = "";
-      catFin.classList.remove("is-fleeing");
-    }, RM ? 240 : 900);
-  }else{                                        // alla terza si arrende
-    purring = true;
-    clearTimeout(fleeTimer);
-    catFin.style.transform = "";
-    catFin.classList.remove("is-fleeing");
-    catFinWrap.classList.add("is-purring");
-    say("mrrr mrrr");
-    buzz([30,60,30,60,45]);
-    Music.purr();
+  /* i comandi non devono mai finire sotto il gattino */
+  function misuraUI(){
+    zoneUI = [ $(".game__top", panel).getBoundingClientRect(),
+               $("#toys").getBoundingClientRect() ];
   }
-});
+  function sopraUI(){
+    const h = KH*0.34, w = KW*0.34;
+    for(let i=0;i<zoneUI.length;i++){
+      const r = zoneUI[i];
+      if(cat.x + w > r.left && cat.x - w < r.right &&
+         cat.y + h > r.top  && cat.y - h < r.bottom) return true;
+    }
+    return false;
+  }
+
+  function home(){
+    const r = field.getBoundingClientRect();
+    return r.width > 40 ? r : panel.getBoundingClientRect();
+  }
+  function pickWander(){
+    const r = home(), b = bounds(), pa = panel.getBoundingClientRect();
+    cat.giri++;
+    // il secondo giro è sempre fuori, così si vede subito che può uscire
+    const roll = cat.giri === 2 ? 0 : Math.random();
+    if(roll < 0.3){                       // esce sopra o sotto il riquadro
+      cat.wy = clamp(Math.random() < 0.5 ? pa.top - KH*0.35 : pa.bottom + KH*0.35, b.y0, b.y1);
+      cat.wx = rand(b.x0, b.x1);
+    }else if(roll < 0.42){                // gira per lo schermo
+      cat.wx = rand(b.x0, b.x1); cat.wy = rand(b.y0, b.y1);
+    }else{                                // di solito sta nel riquadro
+      cat.wx = clamp(rand(r.left+34, r.right-34), b.x0, b.x1);
+      cat.wy = clamp(rand(r.top+34, r.bottom-34), b.y0, b.y1);
+    }
+    cat.wait = rand(0.8, 2.4);   // quanto si ferma una volta arrivato
+    cat.trip = 0;                // da quanto è in viaggio
+  }
+
+  function setSay(t, forza){
+    // il limitatore evita lo sfarfallio, ma le frasi importanti passano sempre
+    if(!forza && performance.now() - lastSay < 700) return;
+    lastSay = performance.now();
+    sayEl.textContent = t;
+  }
+
+  /* --- effetti volanti --- */
+  const CUORE = '<svg width="17" height="16" viewBox="0 0 17 16"><path d="M8.5 15S1 10.4 1 5.6A4.3 4.3 0 0 1 8.5 3 4.3 4.3 0 0 1 16 5.6C16 10.4 8.5 15 8.5 15z" fill="#ef8fa2"/></svg>';
+  function fx(x, y, html){
+    const e = document.createElement("span");
+    e.className = "fx";
+    e.style.left = x + "px"; e.style.top = y + "px";
+    e.innerHTML = html;
+    fxEl.appendChild(e);
+    setTimeout(function(){ e.remove(); }, 1500);
+  }
+  function cuori(n){
+    for(let i=0;i<n;i++){
+      setTimeout(function(){
+        fx(cat.x + rand(-26,26), cat.y - 30 + rand(-12,12), CUORE);
+      }, i*130);
+    }
+  }
+
+  /* --- il contatore delle fusa --- */
+  function gain(n, testo){
+    if(festa) { if(testo) fx(cat.x, cat.y-34, testo); return; }
+    fusa = Math.min(100, fusa + n);
+    fillEl.style.width = fusa + "%";
+    if(testo) fx(cat.x, cat.y - 34, testo);
+    if(fusa >= 100) vinci();
+  }
+  function vinci(){
+    festa = true;
+    setSay("Ti vuole bene, pata.", true);
+    cuori(9);
+    buzz([30,60,30,60,50]);
+    Music.purr();
+    setState("purr");
+    petalsBurst();
+  }
+
+  /* --- stati --- */
+  function setState(st){
+    cat.st = st; cat.t = 0;
+    catEl.classList.toggle("is-purring", st === "purr");
+    catEl.classList.toggle("is-eating",  st === "eat");
+    catEl.classList.toggle("is-alert",   st === "chase" || st === "pounce");
+  }
+
+  function place(kind, x, y){
+    const b = bounds();
+    tgt.x = clamp(x, b.x0, b.x1);
+    tgt.y = clamp(y, b.y0, b.y1);
+    tgt.on = true; tgt.kind = kind;
+    const el = items[kind];
+    if(el){ el.classList.add("is-on"); moveItem(el, tgt.x, tgt.y, kind); }
+    if(cat.st === "idle") setState("chase");
+  }
+  function moveItem(el, x, y, kind){
+    el.style.transform = "translate(" + x + "px," + y + "px) translate(-50%,-50%)";
+  }
+  function clearItems(except){
+    Object.keys(items).forEach(function(k){
+      if(k !== except) items[k].classList.remove("is-on");
+    });
+  }
+
+  function preso(){
+    const k = tgt.kind;
+    buzz(14);
+    if(k === "laser"){
+      gain(6, "preso!");
+      tgt.on = false;
+      setTimeout(function(){ if(toy === "laser") items.laser.classList.remove("is-on"); }, 420);
+      setSay("Rimettilo dove vuoi.");
+    }else if(k === "gomitolo"){
+      gain(7, "toc!");
+      const b = bounds();
+      tgt.x = clamp(tgt.x + rand(-150,150), b.x0, b.x1);
+      tgt.y = clamp(tgt.y + rand(-110,110), b.y0, b.y1);
+      moveItem(items.gomitolo, tgt.x, tgt.y, "gomitolo");
+      setSay("L'ha tirato via lui.");
+    }else if(k === "piuma"){
+      gain(8, "zac!");
+      const b = bounds();
+      tgt.x = clamp(tgt.x + rand(-170,170), b.x0, b.x1);
+      tgt.y = clamp(tgt.y + rand(-130,130), b.y0, b.y1);
+      moveItem(items.piuma, tgt.x, tgt.y, "piuma");
+      setSay("Muovila ancora.");
+    }
+    Music.mew();
+    setState(tgt.on ? "chase" : "idle");
+    if(!tgt.on) pickWander();
+  }
+
+  function mangia(){
+    setState("eat");
+    setSay("Gnam.");
+    Music.crunch();
+    fx(cat.x + 4, cat.y - 26, "gnam gnam");
+  }
+  function fineMangia(){
+    items.cibo.classList.remove("is-on");
+    tgt.on = false;
+    gain(16, CUORE);
+    cuori(3);
+    Music.purr();
+    setSay("Adesso è contento.");
+    setState("purr");
+  }
+
+  function coccola(){
+    if(cat.st === "eat"){ setSay("Fallo mangiare in pace."); return; }
+    setState("purr");
+    cuori(3);
+    gain(9, "mrrr");
+    buzz([26,52,26]);
+    Music.purr();
+    setSay(festa ? "Ti vuole bene, pata." : "Fa le fusa.");
+  }
+
+  /* --- il ciclo --- */
+  function update(dt){
+    cat.t += dt;
+    let tx = cat.x, ty = cat.y, sp = 0;
+
+    if(cat.st === "idle"){
+      if(tgt.on){ setState("chase"); }
+      else{
+        cat.trip += dt;
+        tx = cat.wx; ty = cat.wy;
+        if(D(cat.x,cat.y,tx,ty) > 16){
+          sp = 140;                              // cammina finché non ci arriva
+          if(cat.trip > 6) pickWander();         // se proprio non ci arriva, cambia idea
+        }else{
+          cat.wait -= dt;                        // arrivato: si ferma un attimo
+          if(cat.wait <= 0) pickWander();
+        }
+      }
+    }else if(cat.st === "chase"){
+      if(!tgt.on){ setState("idle"); pickWander(); }
+      else{
+        tx = tgt.x; ty = tgt.y;
+        sp = tgt.kind === "cibo" ? 200 : 330;
+        const d = D(cat.x,cat.y,tx,ty);
+        if(d < (tgt.kind === "cibo" ? 44 : 50)){
+          if(tgt.kind === "cibo") mangia();
+          else setState("pounce");
+        }
+      }
+    }else if(cat.st === "pounce"){
+      if(cat.t > 0.52){ preso(); }
+      else if(cat.t > 0.2){ tx = tgt.x; ty = tgt.y; sp = 540; }
+    }else if(cat.st === "eat"){
+      if(cat.t > 2.2) fineMangia();
+    }else if(cat.st === "purr"){
+      if(cat.t > (festa ? 4.5 : 2.4)){ setState("idle"); pickWander(); }
+    }
+
+    /* movimento */
+    const dx = tx - cat.x, dy = ty - cat.y;
+    const d = Math.hypot(dx, dy) || 1;
+    const wx = sp ? dx/d*sp : 0, wy = sp ? dy/d*sp : 0;
+    const k = Math.min(1, dt * (sp > 400 ? 11 : 6));
+    cat.vx += (wx - cat.vx) * k;
+    cat.vy += (wy - cat.vy) * k;
+    cat.x += cat.vx * dt;
+    cat.y += cat.vy * dt;
+
+    const b = bounds();
+    if(cat.x < b.x0){ cat.x = b.x0; cat.vx = 0; }
+    if(cat.x > b.x1){ cat.x = b.x1; cat.vx = 0; }
+    if(cat.y < b.y0){ cat.y = b.y0; cat.vy = 0; }
+    if(cat.y > b.y1){ cat.y = b.y1; cat.vy = 0; }
+
+    /* resa a schermo */
+    const v = Math.hypot(cat.vx, cat.vy);
+    const cammina = v > 34;
+    catEl.classList.toggle("is-walking", cammina);
+
+    let sx = 1, sy = 1, bob = 0, rot = 0;
+    if(cat.st === "pounce" && cat.t <= 0.2){ sx = 1.18; sy = 0.84; }
+    else if(cat.st === "pounce"){ sx = 0.88; sy = 1.16; }
+    else if(cat.st === "purr"){ const b2 = 1 + Math.sin(cat.t*6.5)*0.035; sx = b2; sy = b2; }
+    if(cammina && !RM){ bob = Math.sin(cat.t*17)*4; rot = clamp(cat.vx/70, -1, 1) * 6; }
+
+    catEl.style.transform =
+      "translate(" + cat.x.toFixed(1) + "px," + (cat.y + bob).toFixed(1) + "px)" +
+      " translate(-50%,-50%) rotate(" + rot.toFixed(2) + "deg) scale(" + sx.toFixed(3) + "," + sy.toFixed(3) + ")";
+
+    /* se è sopra i comandi, i tocchi devono passare ai pulsanti */
+    catEl.style.pointerEvents = sopraUI() ? "none" : "auto";
+
+    /* le pupille seguono */
+    const px = clamp((tx - cat.x)/70, -1, 1) * 3.2;
+    const py = clamp((ty - cat.y)/70, -1, 1) * 2.6;
+    for(let i=0;i<pupils.length;i++){
+      pupils[i].style.transform = "translate(" + px.toFixed(2) + "px," + py.toFixed(2) + "px)";
+    }
+
+    /* battito di ciglia */
+    if(!RM && performance.now() > blinkAt){
+      blinkAt = performance.now() + rand(2400, 6200);
+      catEl.classList.add("is-blink");
+      setTimeout(function(){ catEl.classList.remove("is-blink"); }, 130);
+    }
+  }
+
+  function loop(ts){
+    if(!aperto) return;
+    const dt = Math.min(0.05, (ts - last)/1000 || 0.016);
+    last = ts;
+    update(dt);
+    raf = requestAnimationFrame(loop);
+  }
+
+  /* --- puntamento --- */
+  function fromEvent(e){
+    const t = e.touches && e.touches[0];
+    return { x: t ? t.clientX : e.clientX, y: t ? t.clientY : e.clientY };
+  }
+  function ignora(e){
+    return !!(e.target.closest && e.target.closest(".game__top, .toys, .game__cat"));
+  }
+  function punta(e){
+    if(!aperto || ignora(e)) return;
+    const p = fromEvent(e);
+    if(p.x == null) return;
+    clearItems(toy);
+    place(toy, p.x, p.y);
+    if(toy === "cibo") setSay("Sta arrivando.");
+  }
+
+  layer.addEventListener("pointerdown", punta);
+  layer.addEventListener("pointermove", function(e){
+    if(toy === "laser" || toy === "piuma"){
+      if(e.buttons || e.pointerType === "mouse") punta(e);
+    }
+  }, { passive:true });
+
+  catEl.addEventListener("pointerdown", function(e){ e.stopPropagation(); coccola(); });
+
+  $$(".toy", $("#toys")).forEach(function(b){
+    b.addEventListener("click", function(){
+      $$(".toy", $("#toys")).forEach(function(o){ o.classList.remove("is-on"); });
+      b.classList.add("is-on");
+      toy = b.dataset.toy;
+      tgt.on = false;
+      clearItems(null);
+      setState("idle"); pickWander();
+      lastSay = 0;
+      setSay(toy === "laser"    ? "Muovi il dito: ti viene dietro."
+           : toy === "gomitolo" ? "Tocca dove vuoi tirarlo."
+           : toy === "piuma"    ? "Falla ballare davanti a lui."
+           :                      "Tocca dove metti la ciotola.");
+    });
+  });
+
+  /* --- apri / chiudi --- */
+  let tornaA = null;
+  function apri(){
+    if(aperto) return;
+    aperto = true;
+    tornaA = document.activeElement;
+    layer.hidden = false;
+    document.body.classList.add("is-playing");
+    $(".scene[data-scene='5'] .scene__inner").style.opacity = "0";
+
+    catEl.style.setProperty("--kw", KW + "px");
+    if(!catEl.innerHTML) catEl.innerHTML = kittySVG("g");
+    pupils = $$(".k-pupil", catEl);
+
+    if(!gPetals.childElementCount && !RM){
+      const f = document.createDocumentFragment();
+      for(let i=0, n = MOBILE ? 10 : 16; i<n; i++) f.appendChild(makePetal(false));
+      gPetals.appendChild(f);
+    }
+
+    const r = home();
+    cat.x = r.left + r.width/2; cat.y = r.top + r.height/2;
+    cat.vx = cat.vy = 0;
+    misuraUI();
+    cat.giri = 0;
+    setState("idle"); pickWander();
+
+    syncMute();
+    last = 0;
+    raf = requestAnimationFrame(function(ts){ last = ts; raf = requestAnimationFrame(loop); });
+    setTimeout(function(){ $("#gameClose").focus(); }, 60);
+  }
+  function chiudi(){
+    if(!aperto) return;
+    aperto = false;
+    cancelAnimationFrame(raf);
+    layer.hidden = true;
+    document.body.classList.remove("is-playing");
+    $(".scene[data-scene='5'] .scene__inner").style.opacity = "";
+    if(tornaA && tornaA.focus) tornaA.focus();
+    say(festa ? "Gli sei piaciuta." : "Torna quando vuoi.", 4000);
+  }
+
+  $("#gameClose").addEventListener("click", chiudi);
+  document.addEventListener("keydown", function(e){
+    if(!aperto) return;
+    if(e.key === "Escape"){ chiudi(); return; }
+    if(e.key === "Tab"){                                  // il fuoco resta nel pop-up
+      const f = $$('button, [href], input, [tabindex]:not([tabindex="-1"])', panel)
+                  .filter(function(el){ return el.offsetParent !== null; });
+      if(!f.length) return;
+      const first = f[0], lastEl = f[f.length-1];
+      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); lastEl.focus(); }
+      else if(!e.shiftKey && document.activeElement === lastEl){ e.preventDefault(); first.focus(); }
+    }
+  });
+
+  function syncMute(){ $("#gameMute").classList.toggle("is-muted", Music.isMuted()); }
+  $("#gameMute").addEventListener("click", function(){
+    const m = Music.toggle();
+    $("#gameMute").classList.toggle("is-muted", m);
+    $("#mute").classList.toggle("is-muted", m);
+  });
+
+  window.addEventListener("resize", function(){
+    if(!aperto) return;
+    misuraUI();
+    const b = bounds();
+    cat.x = clamp(cat.x, b.x0, b.x1); cat.y = clamp(cat.y, b.y0, b.y1);
+    pickWander();
+  });
+
+  return { apri: apri, chiudi: chiudi, isOpen: function(){ return aperto; } };
+})();
+
+$("#openGame").addEventListener("click", Gioco.apri);
+$("#catPeek").addEventListener("click", Gioco.apri);
 
 const finalEl = $("#final");
 function showFinal(){
@@ -1325,7 +2037,7 @@ function showFinal(){
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
         catFinWrap.classList.add("is-in");
-        say("toccalo", 5200);
+        say("vuole giocare", 5200);
       });
     });
   }, RM ? 220 : 2300);

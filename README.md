@@ -40,10 +40,21 @@ Ognuno ha intro, etichette e domande sue. Si cambiano tutti nell'oggetto `OPZION
 
 | Tile | Chiede |
 |---|---|
-| Una serata fuori | Che fame abbiamo? · Pizza / Sushi / Qualcosa di carino / Scegli tu |
-| Un appuntamento con me | Quanto tempo ho? · Un paio d'ore / Tutto il pomeriggio / Fino a sera / Decidi tu |
-| Un viaggio | Quanto stiamo fuori? + Che aria tira? (due domande) |
+| Una serata fuori | Che fame abbiamo? · Pizza / Sushi / Qualcosa di carino / Scegli tu — più "Un posto in mente?" |
+| Un appuntamento con me | Quanto tempo ho? · Un paio d'ore / Tutto il pomeriggio / Fino a sera / Decidi tu — più "Da dove ti passo a prendere?" |
+| Un viaggio | Quanto stiamo fuori? + Che aria tira? — più "Dove ti va di andare?" con 22 mete suggerite |
 | Sorprendimi tu | Quanto posso esagerare? · Poco / Il giusto / Esagera / Fai tu |
+
+### Il posto
+
+Dove ha senso c'è un campo di testo per il luogo. Su "Un viaggio" ha una lista di mete
+suggerite (`datalist`); sugli altri è libero, perché non so in che città siete: se me lo dici,
+ci metto una lista vera di posti vostri.
+
+Appena scrive qualcosa compare **"cercalo su Maps ↗"**, che apre la ricerca già pronta in una
+scheda nuova. Non è l'API di Google Maps — quella vorrebbe una chiave e chiamate esterne, e
+questa pagina non ha dipendenze. È solo un link, ma fa lo stesso lavoro: lei guarda, sceglie,
+e scrive il nome nel campo.
 
 Cambiano anche le etichette dei picker ("Che sera", "Si parte il", "Ti passo a prendere alle")
 e il suggerimento nel campo libero. Le risposte finiscono nella mail con la domanda per esteso:
@@ -61,15 +72,38 @@ e il suggerimento nel campo libero. Le risposte finiscono nella mail con la doma
 
 Le chip sono facoltative: se non ne tocca nessuna arriva `(non detto)`, non si blocca niente.
 
-## Il gattino
+## Il gattino e il suo gioco
 
-Ce ne sono due. Uno **di sfondo**, piccolo, che scappa dal dito o dal mouse dalla scena 2 in poi
-e resta sempre fuori dal blocco di testo (se non ha spazio, sparisce).
+Uno **di sfondo**, piccolo, che scappa dal dito o dal mouse dalla scena 2 in poi e resta
+sempre fuori dal blocco di testo (se non ha spazio, sparisce).
 
-Uno **grande alla fine**, sotto il countdown, in mezzo ai petali che cadono:
-i primi due tocchi scappa ("eh no", "quasi"), al terzo si arrende e fa le fusa — occhi
-felici, respiro, vibrazione e un suono di fusa generato al momento. Da lì in poi
-continua a fare le fusa a ogni tocco.
+Alla fine, accanto al pulsante **"clicca qui per il gattino"**, ce n'è uno disegnato per bene:
+soriano rosso a strisce, con pupille che seguono quello che guarda, palpebre che sbattono,
+orecchie che si drizzano, coda che ondeggia e zampine che si alternano quando cammina.
+
+Il pulsante apre un **pop-up trasparente**: niente sfocatura, così lo sfondo e i petali si
+vedono uguali attraverso il pannello, e altri petali cadono anche davanti. Il testo della
+scena 5 si nasconde finché il gioco è aperto.
+
+Il gattino gira **dentro e fuori il riquadro** — ogni tanto se ne va a spasso sopra o sotto il
+pannello. Se finisce sopra i comandi diventa trasparente ai tocchi, così i pulsanti restano
+sempre premibili.
+
+Quattro giochi, più le coccole:
+
+| Gioco | Cosa fa |
+|---|---|
+| **Puntatore** | il pallino rosso segue il dito, lui lo insegue e ci salta sopra |
+| **Gomitolo** | tocchi dove tirarlo, lui lo raggiunge e lo scaraventa via |
+| **Piuma** | la muovi, lui la azzanna e quella scappa |
+| **Crocchette** | metti la ciotola, lui ci arriva e mangia (con rumore di crocchette) |
+| **Coccola** | tocchi lui: occhi felici, cuoricini, fusa e vibrazione |
+
+Ogni cosa riempie la barra **fusa**. A 100 parte la festa: pioggia di cuoricini, petali
+intensificati e "Ti vuole bene, pata."
+
+Tutti i versi (fusa, miagolio, crocchette) sono generati con la Web Audio API. Nessun file.
+Si chiude con la X o con Esc, e il fuoco resta dentro il pop-up finché è aperto.
 
 ## Cosa è calcolato da solo
 
@@ -89,5 +123,5 @@ il giorno dopo si aggiorna da solo, plurali compresi.
 - Se il browser blocca l'audio, il tastino mute sparisce e il resto funziona uguale.
 - Le scene avanzano solo al tocco. Mai un timer.
 - Rispetta `prefers-reduced-motion`.
-- Petali solo via `transform`/`opacity`: 24 su mobile, 33 nella scena finale.
+- Petali solo via `transform`/`opacity`: 24 su mobile, 33 nella scena finale, +10 nel pop-up del gioco.
 - Testata a 320, 375, 414px e su desktop.
