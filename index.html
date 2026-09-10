@@ -1,0 +1,1224 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sofia</title>
+<meta name="theme-color" content="#ffd9d2">
+<meta name="description" content="Sofia, apri qui.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sofia, apri qui">
+<meta property="og:description" content="Una cosa piccola, fatta a mano.">
+<style>
+/* ============================================================
+   PALETTE  (fallback: rosa / pesca / crema + accenti dorati)
+   ============================================================ */
+:root{
+  --crema:   #fff4ea;
+  --pesca:   #ffcfae;
+  --rosa:    #f7b3bb;
+  --rosa-sc: #ef97a6;
+  --oro:     #d8a24e;
+  --oro-ch:  #f0cf8f;
+  --testo:   #6d3b40;
+  --testo-2: #96636a;
+
+  --ease: cubic-bezier(.22,1,.36,1);
+  --scene-t: .72s;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html,body{ height:100%; margin:0; }
+body{
+  background: var(--crema);
+  color: var(--testo);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size:16px; line-height:1.5;
+  overflow:hidden; overscroll-behavior:none;
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+button, input, textarea{ font:inherit; color:inherit; }
+[hidden]{ display:none !important; }   /* le regole qui sotto non devono batterlo */
+
+/* ============================================================
+   1. IL CIELO — un unico sfondo, non si interrompe mai
+   ============================================================ */
+#sky{
+  position:fixed; inset:0; z-index:0; overflow:hidden;
+  background: linear-gradient(168deg,
+     #fff6ec  0%,
+     #ffe6d8 26%,
+     #ffd4cd 52%,
+     #fdc0be 76%,
+     #f6aeb2 100%);
+}
+.blob{
+  position:absolute; border-radius:50%;
+  will-change: transform;
+  pointer-events:none;
+}
+.b1{
+  width:120vmax; height:120vmax; left:-45vmax; top:-55vmax;
+  background: radial-gradient(closest-side, rgba(255,214,180,.85), rgba(255,214,180,0));
+  animation: drift1 34s ease-in-out infinite alternate;
+}
+.b2{
+  width:110vmax; height:110vmax; right:-50vmax; top:18vh;
+  background: radial-gradient(closest-side, rgba(247,163,178,.62), rgba(247,163,178,0));
+  animation: drift2 41s ease-in-out infinite alternate;
+}
+.b3{
+  width:95vmax; height:95vmax; left:-30vmax; bottom:-45vmax;
+  background: radial-gradient(closest-side, rgba(255,236,197,.7), rgba(255,236,197,0));
+  animation: drift3 29s ease-in-out infinite alternate;
+}
+@keyframes drift1{ from{transform:translate3d(0,0,0) scale(1)} to{transform:translate3d(9vw,7vh,0) scale(1.14)} }
+@keyframes drift2{ from{transform:translate3d(0,0,0) scale(1.08)} to{transform:translate3d(-11vw,-9vh,0) scale(.94)} }
+@keyframes drift3{ from{transform:translate3d(0,0,0) scale(.96)} to{transform:translate3d(8vw,-6vh,0) scale(1.16)} }
+
+/* ============================================================
+   2. I PETALI — transform/opacity soltanto (GPU)
+   ============================================================ */
+#petals, #burst{
+  position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden;
+  opacity:.92; transition: opacity 1.4s ease;
+}
+#petals.is-soft{ opacity:.34; }              /* scena lettera: si diradano */
+#petals.is-burst{ opacity:1; }               /* scena finale: si intensificano */
+.petal{
+  position:absolute; top:0; left:0;
+  will-change: transform;
+  animation: fall var(--dur) linear var(--delay) infinite;
+}
+.petal > i{
+  display:block; width:11px; height:14px;
+  border-radius: 100% 0 100% 0;
+  background: linear-gradient(135deg, #ffe0e5 0%, #f7aebb 55%, #ec8fa1 100%);
+  opacity: var(--o);
+  will-change: transform, opacity;
+  transition: opacity 1.2s ease;
+  animation: sway var(--sway) ease-in-out infinite alternate;
+}
+.petal:nth-child(7n) > i{ background: linear-gradient(135deg,#fff0d2 0%,#efcd8d 55%,#dcae61 100%); }
+.petal:nth-child(5n) > i{ background: linear-gradient(135deg,#fff3ea 0%,#ffd3b6 60%,#f7b995 100%); }
+/* diradamento: metà petali svaniscono, gli altri restano */
+#petals.is-soft .petal:nth-child(2n) > i{ opacity:0; }
+
+@keyframes fall{
+  from{ transform: translate3d(var(--x), -18vh, 0); }
+  to  { transform: translate3d(var(--x), 118vh, 0); }
+}
+@keyframes sway{
+  from{ transform: translate3d(-15px,0,0) rotate(var(--rot))                     scale(var(--s)); }
+  to  { transform: translate3d(15px,0,0)  rotate(calc(var(--rot) + 240deg))      scale(var(--s)); }
+}
+#burst .petal{ animation-iteration-count: 1; }
+
+/* ============================================================
+   3. IL GATTINO
+   ============================================================ */
+#cat{
+  position:fixed; left:0; top:0; z-index:2;
+  width:74px; height:68px;
+  color: rgba(122,72,80,.42);
+  pointer-events:none;                       /* non blocca MAI un tocco */
+  opacity:0;
+  transition: transform .95s var(--ease), opacity .6s ease;
+  will-change: transform, opacity;
+}
+#cat.is-on{ opacity:1; }
+.cat-tail{ transform-origin: 88px 88px; animation: tail 2.6s ease-in-out infinite alternate; }
+@keyframes tail{ from{ transform: rotate(-7deg) } to{ transform: rotate(13deg) } }
+#catHint{
+  position:fixed; z-index:3; margin:0; padding:0;
+  font-size:12px; letter-spacing:.09em; text-transform:lowercase;
+  color: rgba(122,72,80,.55);
+  pointer-events:none; opacity:0;
+  transition: opacity .8s ease, transform .8s var(--ease);
+  transform: translate3d(0,6px,0);
+}
+#catHint.is-on{ opacity:1; transform:none; }
+
+/* ============================================================
+   4. MUTE
+   ============================================================ */
+#mute{
+  position:fixed; z-index:20;
+  top: calc(10px + env(safe-area-inset-top));
+  right: calc(10px + env(safe-area-inset-right));
+  width:42px; height:42px; padding:0;
+  display:grid; place-items:center;
+  border:0; border-radius:50%;
+  background: rgba(255,255,255,.34);
+  color: rgba(109,59,64,.6);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  cursor:pointer;
+  transition: background .25s ease, color .25s ease, transform .2s var(--ease);
+}
+#mute:active{ transform: scale(.92); }
+#mute .wave{ transition: opacity .2s ease; }
+#mute.is-muted .wave{ opacity:0; }
+#mute .slash{ opacity:0; transition: opacity .2s ease; }
+#mute.is-muted .slash{ opacity:1; }
+
+/* ============================================================
+   5. LE SCENE — un unico foglio che scorre
+   ============================================================ */
+#stage{
+  position:fixed; inset:0; z-index:3;
+  height:100vh; height:100dvh;
+}
+.scene{
+  position:absolute; inset:0;
+  display:flex; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  opacity:0; visibility:hidden;
+  transform: translate3d(0,28px,0);
+  transition: opacity var(--scene-t) ease,
+              transform var(--scene-t) var(--ease),
+              visibility 0s linear var(--scene-t);
+  will-change: opacity, transform;
+}
+.scene.is-active{
+  opacity:1; visibility:visible; transform:none;
+  transition-delay: 0s, 0s, 0s;
+}
+.scene.is-out{ transform: translate3d(0,-32px,0); }   /* esce verso l'alto */
+.scene__inner{
+  margin:auto; width:100%; max-width:520px;
+  padding: calc(7vh + env(safe-area-inset-top)) 22px calc(7vh + env(safe-area-inset-bottom));
+  text-align:center;
+}
+#s1{ cursor:pointer; }
+
+/* --- tipografia --- */
+.hero{
+  margin:0;
+  font-family: ui-serif, Georgia, "Iowan Old Style", Palatino, "Times New Roman", serif;
+  font-weight:400; font-size: clamp(40px, 13.5vw, 68px); line-height:1.06;
+  letter-spacing:-.015em;
+  text-shadow: 0 2px 24px rgba(255,255,255,.5);
+}
+.hero em{
+  display:block; font-style:italic;
+  background: linear-gradient(100deg, #b04b55, #bd8228);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.h2{
+  margin:0 0 6px;
+  font-family: ui-serif, Georgia, "Iowan Old Style", Palatino, serif;
+  font-weight:400; font-size: clamp(27px, 8vw, 38px); line-height:1.18;
+}
+.h2 .soft{ color: var(--testo-2); }
+.label{
+  margin:0 0 10px; font-size:12px; letter-spacing:.24em; text-transform:uppercase;
+  color: var(--testo-2);
+}
+.sub{ margin:14px 0 0; font-size:15px; color: var(--testo-2); }
+
+/* --- bottoni --- */
+.btn{
+  -webkit-appearance:none; appearance:none;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:50px; margin-top:30px; padding:0 30px;
+  border:0; border-radius:999px;
+  background: linear-gradient(135deg, #ffffffee, #ffe9df);
+  box-shadow: 0 8px 22px rgba(180,90,95,.16), inset 0 0 0 1px rgba(255,255,255,.8);
+  color: var(--testo);
+  font-size:16px; letter-spacing:.02em;
+  cursor:pointer;
+  transition: transform .2s var(--ease), box-shadow .25s ease, opacity .3s ease;
+}
+.btn:active{ transform: scale(.97); box-shadow: 0 4px 12px rgba(180,90,95,.14), inset 0 0 0 1px rgba(255,255,255,.8); }
+.btn[disabled]{ opacity:.6; cursor:default; }
+.btn--send{
+  width:100%; margin-top:22px;
+  background: linear-gradient(135deg, var(--rosa), var(--pesca) 70%, var(--oro-ch));
+  color:#5c2f34; font-weight:600;
+  box-shadow: 0 10px 26px rgba(214,120,124,.3), inset 0 0 0 1px rgba(255,255,255,.45);
+}
+.btn--ghost{
+  min-height:40px; margin:0; padding:0 16px; font-size:14px;
+  background: rgba(255,255,255,.5); box-shadow:none; color: var(--testo-2);
+}
+
+/* --- scena 1 --- */
+.tap{
+  display:inline-flex; align-items:center; gap:9px;
+  margin-top:34px; padding:0; border:0; background:none;
+  font-size:14px; letter-spacing:.14em; text-transform:lowercase;
+  color: var(--testo-2); cursor:pointer;
+}
+.tap .dot{
+  width:8px; height:8px; border-radius:50%;
+  background: var(--rosa-sc);
+  animation: beat 2.1s ease-in-out infinite;
+}
+@keyframes beat{ 0%,100%{ transform:scale(1); opacity:.55 } 50%{ transform:scale(1.55); opacity:1 } }
+.fade-up{ opacity:0; transform: translate3d(0,14px,0); }
+.is-active .fade-up{
+  opacity:1; transform:none;
+  transition: opacity 1.1s ease var(--d,0s), transform 1.1s var(--ease) var(--d,0s);
+}
+
+/* --- scena 2: contatore --- */
+.counter{
+  font-family: ui-serif, Georgia, "Iowan Old Style", Palatino, serif;
+  font-size: clamp(60px, 21vw, 108px); line-height:1;
+  font-variant-numeric: tabular-nums; font-feature-settings:"tnum";
+  letter-spacing:-.02em;
+  background: linear-gradient(120deg, #a8434e, #cf7c86 42%, #c08a30 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.counter.is-rolling{ animation: tick .1s steps(2) infinite; }
+@keyframes tick{ from{ transform: translate3d(0,-1px,0) } to{ transform: translate3d(0,1px,0) } }
+
+/* --- scena 3: la busta --- */
+.env-wrap{ display:flex; flex-direction:column; align-items:center; transition: opacity .5s ease, transform .5s var(--ease); }
+.env-wrap.is-gone{ opacity:0; transform: scale(.94); pointer-events:none; }
+.env-wrap.is-out{ display:none; }
+.env{
+  position:relative; display:block; padding:0; border:0; background:none; cursor:pointer;
+  width: min(300px, 76vw); aspect-ratio: 1 / .66;
+  perspective: 900px;
+}
+.env__body{ position:absolute; inset:0; }
+.env__back{
+  position:absolute; inset:0; border-radius:8px;
+  background: linear-gradient(160deg,#fff2e6,#ffdccc);
+  box-shadow: 0 16px 40px rgba(170,90,95,.24);
+}
+.env__paper{
+  position:absolute; left:7%; right:7%; top:9%;
+  height:86%; border-radius:5px;
+  background: linear-gradient(180deg,#fffdfa,#fff5ec);
+  box-shadow: 0 3px 12px rgba(150,80,85,.14);
+  transform-origin: 50% 100%;
+  transition: transform .85s var(--ease) .35s;
+  z-index:1;
+}
+.env.is-open .env__paper{ transform: translate3d(0,-46%,0); }
+.env__front{
+  position:absolute; inset:0; z-index:2; border-radius:8px;
+  background: linear-gradient(155deg,#ffe6d6,#ffd0c4);
+  clip-path: polygon(0 34%, 50% 74%, 100% 34%, 100% 100%, 0 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+}
+.env__flap{
+  position:absolute; left:0; right:0; top:0; height:56%;
+  z-index:3;
+  background: linear-gradient(165deg,#fff0e2,#ffdbcb);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0%;
+  transition: transform .75s var(--ease), z-index 0s linear .38s;
+  backface-visibility: hidden;
+}
+.env.is-open .env__flap{ transform: rotateX(180deg); z-index:0; }
+.env__seal{
+  position:absolute; left:50%; top:50%; z-index:4;
+  width:34px; height:34px; margin:-17px 0 0 -17px; border-radius:50%;
+  background: radial-gradient(circle at 34% 30%, var(--oro-ch), var(--oro));
+  box-shadow: 0 3px 10px rgba(150,100,40,.34);
+  display:grid; place-items:center;
+  color:#7a5518; font-size:15px;
+  transition: opacity .3s ease, transform .5s var(--ease);
+}
+.env.is-open .env__seal{ opacity:0; transform: scale(.4) rotate(40deg); }
+
+.letter{
+  text-align:left;
+  background: linear-gradient(180deg, rgba(255,253,250,.94), rgba(255,246,238,.9));
+  border-radius:18px;
+  padding: 30px 26px 26px;
+  box-shadow: 0 18px 44px rgba(170,95,100,.16), inset 0 0 0 1px rgba(255,255,255,.7);
+  font-family: ui-serif, Georgia, "Iowan Old Style", Palatino, serif;
+  font-size:17px; line-height:1.72;
+}
+.letter p{ margin:0 0 15px; opacity:0; transform: translate3d(0,10px,0); }
+.letter.is-open p{
+  opacity:1; transform:none;
+  transition: opacity .95s ease var(--d), transform .95s var(--ease) var(--d);
+}
+.letter .btn{ display:flex; margin:22px auto 0; opacity:0; transition: opacity .8s ease 2.6s; }
+.letter.is-open .btn{ opacity:1; }
+
+/* --- scena 4: i quattro tile --- */
+.tiles{
+  display:grid; grid-template-columns: repeat(2, 1fr); gap:12px;
+  margin-top:26px; max-height:1000px;
+  transition: opacity .42s ease, transform .42s var(--ease), max-height .5s var(--ease), margin .42s ease;
+}
+.tiles.is-collapsed{ opacity:0; transform: scale(.93); max-height:0; margin-top:0; pointer-events:none; }
+.tile{
+  position:relative; display:flex; flex-direction:column; justify-content:flex-end; gap:2px;
+  aspect-ratio: 1 / 1; padding:14px;
+  border:0; border-radius:18px; text-align:left; cursor:pointer;
+  background: linear-gradient(160deg, rgba(255,255,255,.72), rgba(255,238,229,.62));
+  box-shadow: 0 10px 26px rgba(175,95,100,.14), inset 0 0 0 1px rgba(255,255,255,.66);
+  transition: transform .3s var(--ease), opacity .35s ease, box-shadow .3s ease;
+}
+.tile:active{ transform: scale(.96); }
+.tile.is-dim{ opacity:.14; transform: scale(.9); }
+.tile .ico{ position:absolute; top:13px; left:13px; color: var(--rosa-sc); opacity:.9; }
+.tile .t{ font-size:15px; font-weight:600; line-height:1.25; }
+.tile .d{ font-size:12.5px; color: var(--testo-2); line-height:1.3; }
+
+/* --- il mini form --- */
+.form{ margin-top:22px; text-align:left; opacity:0; transform: translate3d(0,14px,0); transition: opacity .5s ease, transform .5s var(--ease); }
+.form.is-in{ opacity:1; transform:none; }
+.form.is-sent{ opacity:0; transform: translate3d(0,10px,0) scale(.96); }
+.chosen{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 14px; margin-bottom:18px;
+  border-radius:14px;
+  background: linear-gradient(135deg, rgba(247,179,187,.34), rgba(255,207,174,.3));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.5);
+}
+.chosen b{ font-size:15px; font-weight:600; }
+.field{ display:block; margin-bottom:14px; }
+.field > span{ display:block; margin-bottom:6px; font-size:13px; letter-spacing:.05em; color: var(--testo-2); }
+.field input, .field textarea{
+  -webkit-appearance:none; appearance:none;
+  width:100%; min-width:0; min-height:50px; padding:13px 14px;
+  border:0; border-radius:13px;
+  background: rgba(255,255,255,.78);
+  box-shadow: inset 0 0 0 1px rgba(214,150,150,.28);
+  font-size:16px;                       /* 16px = niente zoom automatico su iOS */
+  transition: box-shadow .2s ease;
+}
+.field textarea{ resize:none; line-height:1.5; }
+.field input:focus, .field textarea:focus{
+  outline:none; box-shadow: inset 0 0 0 2px var(--rosa-sc);
+}
+.field input[type="date"], .field input[type="time"]{ min-height:50px; }
+.row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; min-width:0; }
+.row > .field{ min-width:0; }
+@media (max-width: 359px){ .row{ grid-template-columns:1fr; } }
+.note{
+  margin:14px 0 0; font-size:12.5px; line-height:1.5; color: var(--testo-2); text-align:center;
+}
+.err{
+  margin:16px 0 0; padding:14px; border-radius:13px;
+  background: rgba(255,255,255,.7); box-shadow: inset 0 0 0 1px rgba(214,150,150,.35);
+  font-size:14.5px; line-height:1.55; text-align:center;
+}
+.err .btn{ margin-top:12px; min-height:42px; font-size:15px; }
+.spin{
+  width:15px; height:15px; border-radius:50%;
+  border:2px solid rgba(92,47,52,.28); border-top-color:#5c2f34;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin{ to{ transform: rotate(360deg) } }
+
+/* --- scena 5 --- */
+.seal-big{
+  width:70px; height:70px; margin:0 auto 22px;
+  border-radius:50%; display:grid; place-items:center;
+  background: radial-gradient(circle at 34% 30%, #fff2dc, var(--oro-ch) 55%, var(--oro));
+  box-shadow: 0 12px 30px rgba(180,130,60,.3);
+  color:#7a5518;
+  animation: pop .8s var(--ease) both;
+}
+@keyframes pop{ from{ transform: scale(.4); opacity:0 } to{ transform: scale(1); opacity:1 } }
+.final{
+  margin:30px 0 0; font-size:17px; line-height:1.68; color: var(--testo);
+  opacity:0; transform: translate3d(0,12px,0);
+  transition: opacity 1.4s ease, transform 1.4s var(--ease);
+}
+.final.is-in{ opacity:1; transform:none; }
+.final b{
+  font-family: ui-serif, Georgia, Palatino, serif;
+  font-size:1.35em; font-weight:400;
+  background: linear-gradient(120deg, #b04b55, #bd8228);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+/* --- avviso di configurazione: lo vede solo Meme finché l'endpoint è vuoto --- */
+#cfgWarn{
+  position:fixed; z-index:40; left:10px; right:10px;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  padding:11px 14px; border-radius:12px;
+  background: rgba(70,38,42,.9); color:#ffe9e0;
+  font-size:12.5px; line-height:1.45; text-align:center;
+}
+#cfgWarn code{ font-size:12px; color:#ffd9a8; }
+
+/* ============================================================
+   6. prefers-reduced-motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  :root{ --scene-t:.28s; }
+  .blob{ animation:none !important; }
+  .petal{ animation:none !important; }
+  .petal > i{ animation:none !important; }
+  #petals{ opacity:.3 !important; }
+  #burst{ display:none !important; }
+  .cat-tail{ animation:none !important; }
+  #cat{ transition: opacity .2s ease; }
+  .tap .dot{ animation:none !important; opacity:.9; }
+  .counter.is-rolling{ animation:none !important; }
+  .seal-big{ animation:none !important; }
+  .scene, .scene.is-active, .scene.is-out{ transform:none !important; }
+  .is-active .fade-up, .letter.is-open p{ transform:none !important; }
+  .env__flap, .env__paper{ transition-duration:.01s !important; }
+  .final{ transform:none !important; }
+  .letter .btn{ transition-delay:.25s !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ---------- sfondo ---------- -->
+<div id="sky" aria-hidden="true">
+  <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+</div>
+<div id="petals" aria-hidden="true"></div>
+<div id="burst" aria-hidden="true"></div>
+
+<!-- ---------- gattino ---------- -->
+<svg id="cat" viewBox="0 0 120 110" aria-hidden="true">
+  <path class="cat-tail" d="M92 88 C116 88 114 60 99 56" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+  <path d="M34 56h44c9 0 16 7 16 16v10c0 7-5 12-12 12H30c-7 0-12-5-12-12V72c0-9 7-16 16-16z" fill="currentColor"/>
+  <path d="M36 27l-3-18 17 9z" fill="currentColor"/>
+  <path d="M76 27l3-18-17 9z" fill="currentColor"/>
+  <circle cx="56" cy="43" r="24" fill="currentColor"/>
+  <g fill="#fff6ef"><circle cx="47" cy="42" r="3.1"/><circle cx="65" cy="42" r="3.1"/></g>
+  <path d="M56 50l-3.4-3.4h6.8z" fill="#fff6ef" opacity=".8"/>
+</svg>
+<p id="catHint">prova a prenderlo</p>
+
+<!-- ---------- mute ---------- -->
+<button id="mute" type="button" aria-label="Attiva o disattiva la musica" hidden>
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 9.5h3.2L12 5.5v13L7.2 14.5H4z" fill="currentColor" stroke="none"/>
+    <g class="wave"><path d="M15.6 9.2a4 4 0 0 1 0 5.6"/><path d="M18.2 6.8a7.5 7.5 0 0 1 0 10.4"/></g>
+    <g class="slash"><path d="M15.5 9.5l5 5M20.5 9.5l-5 5"/></g>
+  </svg>
+</button>
+
+<!-- ---------- le scene ---------- -->
+<main id="stage">
+
+  <!-- 1. APERTURA -->
+  <section class="scene is-active" data-scene="1" id="s1">
+    <div class="scene__inner">
+      <h1 class="hero fade-up" style="--d:.35s">Sofia,<em>apri qui</em></h1>
+      <button class="tap fade-up" id="startBtn" type="button" style="--d:1.4s">
+        <span class="dot"></span>tocca lo schermo
+      </button>
+    </div>
+  </section>
+
+  <!-- 2. CONTATORE -->
+  <section class="scene" data-scene="2" inert>
+    <div class="scene__inner">
+      <p class="label">giorni insieme</p>
+      <div class="counter" id="count">0</div>
+      <p class="sub" id="ymText">&nbsp;</p>
+      <button class="btn" type="button" data-next>e non è finita</button>
+    </div>
+  </section>
+
+  <!-- 3. LA LETTERA -->
+  <section class="scene" data-scene="3" inert>
+    <div class="scene__inner">
+      <div class="env-wrap" id="envWrap">
+        <button class="env" id="env" type="button" aria-label="Apri la lettera">
+          <span class="env__body">
+            <span class="env__back"></span>
+            <span class="env__paper"></span>
+            <span class="env__front"></span>
+            <span class="env__flap"></span>
+            <span class="env__seal">&#10084;</span>
+          </span>
+        </button>
+        <p class="sub">tocca la busta</p>
+      </div>
+
+      <article class="letter" id="letter" hidden>
+        <p style="--d:.15s"><span id="letterOpen"></span></p>
+        <p style="--d:.75s">Non ti scrivo cose complicate perché non sono capace, ma volevo che tu sapessi che sono contento ogni giorno di averti.</p>
+        <p style="--d:1.35s">E siccome sono un programmatore, ti ho fatto una pagina invece di un biglietto.</p>
+        <p style="--d:1.95s">Ti amo, pata.</p>
+        <button class="btn" type="button" data-next>avanti</button>
+      </article>
+    </div>
+  </section>
+
+  <!-- 4. I QUATTRO TILE -->
+  <section class="scene" data-scene="4" inert>
+    <div class="scene__inner">
+      <h2 class="h2">Adesso scegli tu.<br><span class="soft">Una sola, eh.</span></h2>
+
+      <div class="tiles" id="tiles">
+        <button class="tile" type="button" data-choice="Una serata fuori" data-desc="cena insieme">
+          <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a2.5 2.5 0 0 0 5 0V3M8.5 10v11"/><path d="M17.5 3c-1.4 1.4-2 3.2-2 5.2 0 1.6.7 2.8 2 2.8V3zM17.5 11v10"/></svg></span>
+          <span class="t">Una serata fuori</span><span class="d">cena insieme</span>
+        </button>
+        <button class="tile" type="button" data-choice="Un appuntamento con me" data-desc="pomeriggio a sorpresa">
+          <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/></svg></span>
+          <span class="t">Un appuntamento con me</span><span class="d">pomeriggio a sorpresa</span>
+        </button>
+        <button class="tile" type="button" data-choice="Un viaggio" data-desc="una fuga fuori città">
+          <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13.5l3-1 4.5 1.6 3.5-1.2-5-6.3 2-.7 6.4 5.4 3.1-1.1a1.7 1.7 0 1 1 1.1 3.2L5 17.8z"/><path d="M3 21h18"/></svg></span>
+          <span class="t">Un viaggio</span><span class="d">una fuga fuori città</span>
+        </button>
+        <button class="tile" type="button" data-choice="Sorprendimi tu" data-desc="campo libero">
+          <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg></span>
+          <span class="t">Sorprendimi tu</span><span class="d">campo libero</span>
+        </button>
+      </div>
+
+      <form class="form" id="form" novalidate hidden>
+        <div class="chosen">
+          <b id="chosenTitle"></b>
+          <button class="btn btn--ghost" type="button" id="backBtn">cambia</button>
+        </div>
+        <div class="row">
+          <label class="field"><span>Che giorno</span><input type="date" id="fDate" required></label>
+          <label class="field"><span>Che ora</span><input type="time" id="fTime" required></label>
+        </div>
+        <label class="field">
+          <span>Vuoi dirmi qualcosa?</span>
+          <textarea id="fMsg" rows="3" maxlength="600" placeholder="anche niente, eh"></textarea>
+        </label>
+        <button class="btn btn--send" type="submit" id="sendBtn">Invia</button>
+        <p class="note" id="note">Arriva tutto a me. Tu non devi scrivere nessuna mail.</p>
+        <p class="err" id="err" hidden></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- 5. CHIUSURA -->
+  <section class="scene" data-scene="5" inert>
+    <div class="scene__inner">
+      <div class="seal-big">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>
+      </div>
+      <h2 class="h2">Ricevuto, amo.<br><span class="soft">Ci penso io.</span></h2>
+      <p class="final" id="final"></p>
+    </div>
+  </section>
+
+</main>
+
+<div id="cfgWarn" hidden></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   CONFIGURAZIONE  —  l'unica cosa da toccare è qui sotto
+   ============================================================
+   Formspree: crea un form su formspree.io e incolla qui l'URL,
+   es.  "https://formspree.io/f/abcdwxyz"
+   (funziona anche con qualsiasi endpoint che accetti un POST JSON) */
+
+const FORM_ENDPOINT = "";
+
+/* Data di inizio (AAAA-MM-GG). Tutto il resto è calcolato da qui. */
+const DATA_INIZIO = "2022-10-11";
+
+/* ============================================================ */
+
+const RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const MOBILE = window.matchMedia("(max-width: 780px), (pointer: coarse)").matches;
+const $  = function(s,r){ return (r||document).querySelector(s); };
+const $$ = function(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+const rand = function(a,b){ return a + Math.random()*(b-a); };
+
+/* ------------------------------------------------------------
+   DATE — mai niente di hardcodato
+   ------------------------------------------------------------ */
+const _p = DATA_INIZIO.split("-").map(Number);
+const START = new Date(_p[0], _p[1]-1, _p[2]);
+
+function midnight(d){ return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); }
+function daysBetween(a,b){ return Math.round((midnight(b)-midnight(a))/86400000); }
+
+function ymDiff(from,to){
+  let y = to.getFullYear()-from.getFullYear();
+  let m = to.getMonth()-from.getMonth();
+  if(to.getDate() < from.getDate()) m--;
+  if(m < 0){ y--; m += 12; }
+  return { y:y, m:m };
+}
+function nextAnniversary(now){
+  let a = new Date(now.getFullYear(), START.getMonth(), START.getDate());
+  if(midnight(a) < midnight(now)) a = new Date(now.getFullYear()+1, START.getMonth(), START.getDate());
+  return a;
+}
+
+const NUM = ["zero","uno","due","tre","quattro","cinque","sei","sette","otto","nove","dieci",
+             "undici","dodici","tredici","quattordici","quindici","sedici","diciassette",
+             "diciotto","diciannove","venti"];
+function num2word(n){ return NUM[n] !== undefined ? NUM[n] : String(n); }
+function art(n){ return n === 1 ? "un" : num2word(n); }
+function ymPhrase(y,m){
+  const a = y > 0 ? art(y)+" "+(y===1?"anno":"anni") : "";
+  const b = m > 0 ? art(m)+" "+(m===1?"mese":"mesi") : "";
+  if(a && b) return a+" e "+b;
+  return a || b || "pochi giorni";
+}
+
+const NOW      = new Date();
+const GIORNI   = daysBetween(START, NOW);
+const YM       = ymDiff(START, NOW);
+const ANNIV    = nextAnniversary(NOW);
+const MANCANO  = daysBetween(NOW, ANNIV);
+const ANNI_N   = ANNIV.getFullYear() - START.getFullYear();
+
+/* ------------------------------------------------------------
+   PETALI
+   ------------------------------------------------------------ */
+const petalsBox = $("#petals");
+const burstBox  = $("#burst");
+
+function makePetal(fast){
+  const p = document.createElement("div");
+  p.className = "petal";
+  p.style.setProperty("--x",     rand(-2,100).toFixed(2)+"vw");
+  p.style.setProperty("--dur",   (fast ? rand(4.5,7.5) : rand(9,19)).toFixed(2)+"s");
+  p.style.setProperty("--delay", (fast ? 0 : -rand(0,19)).toFixed(2)+"s");
+  p.style.setProperty("--sway",  rand(2.4,5.2).toFixed(2)+"s");
+  p.style.setProperty("--rot",   rand(-180,180).toFixed(0)+"deg");
+  p.style.setProperty("--s",     rand(.55, fast ? 1.5 : 1.25).toFixed(2));
+  p.style.setProperty("--o",     rand(.3, .78).toFixed(2));
+  p.appendChild(document.createElement("i"));
+  return p;
+}
+(function initPetals(){
+  const n = RM ? 8 : (MOBILE ? 26 : 38);
+  const frag = document.createDocumentFragment();
+  for(let i=0;i<n;i++) frag.appendChild(makePetal(false));
+  petalsBox.appendChild(frag);
+})();
+
+function petalsSoft(on){ petalsBox.classList.toggle("is-soft", !!on); }
+function petalsBurst(){
+  if(RM) return;
+  petalsBox.classList.remove("is-soft");
+  petalsBox.classList.add("is-burst");
+  const frag = document.createDocumentFragment();
+  for(let i=0;i<18;i++) frag.appendChild(makePetal(true));
+  burstBox.appendChild(frag);
+  setTimeout(function(){
+    burstBox.innerHTML = "";
+    petalsBox.classList.remove("is-burst");
+  }, 8500);
+}
+
+/* ------------------------------------------------------------
+   AUDIO — Web Audio API, nessun file, nessuna dipendenza.
+   Se il browser blocca tutto, la pagina non se ne accorge.
+   ------------------------------------------------------------ */
+const Music = (function(){
+  const AC = window.AudioContext || window.webkitAudioContext;
+  let ctx=null, master=null, dry=null, wet=null, timer=null;
+  let ok = !!AC, on = false, muted = false;
+  const VOL = 0.15;
+
+  try{ muted = localStorage.getItem("sofia-muted") === "1"; }catch(e){}
+
+  const BPM = 66, STEP = 60/BPM/2;           // ottavi
+  const CHORDS = [
+    [53,57,60,65],   // Fmaj7
+    [57,60,64,67],   // Am7
+    [50,57,60,65],   // Dm7
+    [46,53,57,62]    // Bbmaj7
+  ];
+  const ORDER = [0,1,2,3,2,1,0,2];           // arpeggio su e giù
+  let step = 0, next = 0;
+
+  function hz(m){ return 440 * Math.pow(2, (m-69)/12); }
+
+  function impulse(sec, decay){
+    const len = Math.floor(ctx.sampleRate * sec);
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for(let c=0;c<2;c++){
+      const d = buf.getChannelData(c);
+      for(let i=0;i<len;i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, decay);
+    }
+    return buf;
+  }
+
+  function pluck(m, t, dur, g){
+    const o = ctx.createOscillator(); o.type = "triangle"; o.frequency.value = hz(m);
+    const f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 1900; f.Q.value = .4;
+    const a = ctx.createGain();
+    a.gain.setValueAtTime(0.0001, t);
+    a.gain.exponentialRampToValueAtTime(g, t + 0.025);
+    a.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(f); f.connect(a); a.connect(dry); a.connect(wet);
+    o.start(t); o.stop(t + dur + 0.06);
+  }
+  function pad(m, t, dur, g){
+    const o = ctx.createOscillator(); o.type = "sine"; o.frequency.value = hz(m);
+    const a = ctx.createGain();
+    a.gain.setValueAtTime(0.0001, t);
+    a.gain.linearRampToValueAtTime(g, t + dur*0.42);
+    a.gain.linearRampToValueAtTime(0.0001, t + dur);
+    o.connect(a); a.connect(dry); a.connect(wet);
+    o.start(t); o.stop(t + dur + 0.06);
+  }
+
+  function playStep(i, t){
+    const bar = Math.floor(i/8) % 4;
+    const ch  = CHORDS[bar];
+    const k   = i % 8;
+    pluck(ch[ORDER[k]] + 12, t, 1.5, k === 0 ? 0.09 : 0.055);
+    if(k === 4) pluck(ch[(ORDER[k]+1) % 4] + 24, t, 1.2, 0.028);
+    if(k === 0){
+      pad(ch[0] - 12, t, STEP*8.4, 0.05);
+      pad(ch[2],      t, STEP*8.4, 0.022);
+    }
+  }
+  function tick(){
+    try{
+      while(next < ctx.currentTime + 0.4){ playStep(step, next); next += STEP; step++; }
+    }catch(e){ stop(); }
+  }
+  function stop(){ if(timer){ clearInterval(timer); timer = null; } }
+
+  function build(){
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = 0.0001;
+    dry = ctx.createGain(); dry.gain.value = 0.85;
+    wet = ctx.createGain(); wet.gain.value = 0.4;
+    const rev = ctx.createConvolver(); rev.buffer = impulse(2.4, 2.6);
+    dry.connect(master); wet.connect(rev); rev.connect(master);
+    master.connect(ctx.destination);
+  }
+
+  function start(){
+    if(!ok || on) return;
+    try{
+      build();
+      if(ctx.state === "suspended") ctx.resume();
+      next = ctx.currentTime + 0.12; step = 0;
+      timer = setInterval(tick, 60); tick();
+      on = true;
+      fade(muted ? 0 : VOL, 1.6);
+    }catch(e){ ok = false; stop(); }
+  }
+  function fade(v, s){
+    if(!ctx) return;
+    try{
+      const t = ctx.currentTime;
+      master.gain.cancelScheduledValues(t);
+      master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), t);
+      master.gain.linearRampToValueAtTime(Math.max(v, 0.0001), t + s);
+    }catch(e){}
+  }
+  function toggle(){
+    muted = !muted;
+    try{ localStorage.setItem("sofia-muted", muted ? "1" : "0"); }catch(e){}
+    if(on) fade(muted ? 0 : VOL, 0.4);
+    return muted;
+  }
+
+  document.addEventListener("visibilitychange", function(){
+    if(!ctx || !on) return;
+    try{ document.hidden ? ctx.suspend() : ctx.resume(); }catch(e){}
+  });
+
+  return {
+    start: start,
+    toggle: toggle,
+    isMuted: function(){ return muted; },
+    available: function(){ return ok; }
+  };
+})();
+
+const muteBtn = $("#mute");
+if(Music.available()){
+  muteBtn.hidden = false;
+  muteBtn.classList.toggle("is-muted", Music.isMuted());
+  muteBtn.addEventListener("click", function(){
+    muteBtn.classList.toggle("is-muted", Music.toggle());
+  });
+}
+
+/* ------------------------------------------------------------
+   SCENE — avanzano SOLO su interazione. Mai un timer.
+   ------------------------------------------------------------ */
+const scenes = $$(".scene");
+let current = 1;
+
+function goTo(n){
+  if(n === current || n < 1 || n > scenes.length) return;
+  const from = scenes[current-1], to = scenes[n-1];
+
+  from.classList.add("is-out");
+  from.classList.remove("is-active");
+  from.setAttribute("inert","");
+  setTimeout(function(){ from.classList.remove("is-out"); from.scrollTop = 0; }, 860);
+
+  to.scrollTop = 0;
+  to.removeAttribute("inert");
+  requestAnimationFrame(function(){ to.classList.add("is-active"); });
+
+  current = n;
+  onScene(n);
+}
+$$("[data-next]").forEach(function(b){
+  b.addEventListener("click", function(){ goTo(current + 1); });
+});
+
+function onScene(n){
+  petalsSoft(n === 3);
+  if(n === 2){ startCounter(); showCatHint(); }
+  if(n === 5){ petalsBurst(); showFinal(); }
+  layoutCat();
+}
+
+/* ------------------------------------------------------------
+   SCENA 1 — primo tocco = sblocco audio/animazioni su iOS
+   ------------------------------------------------------------ */
+let unlocked = false;
+function unlock(){
+  if(unlocked) return;
+  unlocked = true;
+  Music.start();
+  goTo(2);
+}
+$("#s1").addEventListener("click", unlock);
+$("#startBtn").addEventListener("click", function(e){ e.stopPropagation(); unlock(); });
+
+/* ------------------------------------------------------------
+   SCENA 2 — count-up con easing (rallenta verso la fine)
+   ------------------------------------------------------------ */
+const countEl = $("#count");
+$("#ymText").textContent = ymPhrase(YM.y, YM.m);
+let counted = false;
+
+function startCounter(){
+  if(counted) return;
+  counted = true;
+  const DUR = RM ? 500 : 2400;
+  const t0 = performance.now();
+  countEl.classList.add("is-rolling");
+
+  (function frame(t){
+    const p = Math.min(1, (t - t0)/DUR);
+    const e = 1 - Math.pow(1 - p, 4);               // easeOutQuart
+    countEl.textContent = Math.round(GIORNI * e).toLocaleString("it-IT");
+    if(p < 1) requestAnimationFrame(frame);
+    else{
+      countEl.textContent = GIORNI.toLocaleString("it-IT");
+      countEl.classList.remove("is-rolling");
+    }
+  })(t0);
+}
+
+/* ------------------------------------------------------------
+   SCENA 3 — la busta
+   ------------------------------------------------------------ */
+$("#letterOpen").textContent = "Amo, oggi sono " + ymPhrase(YM.y, YM.m) + ".";
+
+const envBtn  = $("#env");
+const envWrap = $("#envWrap");
+const letter  = $("#letter");
+let opened = false;
+
+envBtn.addEventListener("click", function(){
+  if(opened) return;
+  opened = true;
+  envBtn.classList.add("is-open");
+  try{ if(navigator.vibrate) navigator.vibrate(18); }catch(e){}
+
+  setTimeout(function(){
+    envWrap.classList.add("is-gone");
+    setTimeout(function(){
+      envWrap.classList.add("is-out");          // esce dal flusso: la lettera si centra
+      letter.hidden = false;
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ letter.classList.add("is-open"); layoutCat(); });
+      });
+    }, RM ? 0 : 420);
+  }, RM ? 120 : 1000);
+});
+
+/* ------------------------------------------------------------
+   SCENA 4 — i tile e il mini form
+   ------------------------------------------------------------ */
+const tiles   = $("#tiles");
+const form    = $("#form");
+const errBox  = $("#err");
+const noteEl  = $("#note");
+const sendBtn = $("#sendBtn");
+const fDate   = $("#fDate");
+const fTime   = $("#fTime");
+const fMsg    = $("#fMsg");
+let choice = null, fails = 0;
+
+(function(){
+  const t = new Date();
+  fDate.min = t.getFullYear() + "-" + String(t.getMonth()+1).padStart(2,"0") + "-" + String(t.getDate()).padStart(2,"0");
+})();
+
+$$(".tile", tiles).forEach(function(tile){
+  tile.addEventListener("click", function(){
+    choice = { titolo: tile.dataset.choice, desc: tile.dataset.desc };
+    $$(".tile", tiles).forEach(function(o){ if(o !== tile) o.classList.add("is-dim"); });
+    $("#chosenTitle").textContent = choice.titolo;
+
+    setTimeout(function(){
+      tiles.classList.add("is-collapsed");
+      form.hidden = false;
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ form.classList.add("is-in"); layoutCat(); });
+      });
+    }, RM ? 0 : 240);
+  });
+});
+
+$("#backBtn").addEventListener("click", function(){
+  form.classList.remove("is-in");
+  setTimeout(function(){
+    form.hidden = true;
+    tiles.classList.remove("is-collapsed");
+    $$(".tile", tiles).forEach(function(o){ o.classList.remove("is-dim"); });
+    resetSend(); layoutCat();
+  }, RM ? 0 : 380);
+});
+
+function resetSend(){
+  sendBtn.disabled = false;
+  sendBtn.textContent = "Invia";
+  errBox.hidden = true; errBox.innerHTML = "";
+  noteEl.hidden = false;
+}
+function fieldError(msg){
+  noteEl.hidden = true;
+  errBox.hidden = false;
+  errBox.innerHTML = "";
+  errBox.appendChild(document.createTextNode(msg));
+}
+function itDate(iso){
+  if(!iso) return "";
+  const p = iso.split("-");
+  return p[2] + "/" + p[1] + "/" + p[0];
+}
+
+function payload(){
+  return {
+    scelta:    choice.titolo,
+    dettaglio: choice.desc,
+    giorno:    itDate(fDate.value),
+    ora:       fTime.value,
+    messaggio: fMsg.value.trim() || "(niente)",
+    _subject:  "Sofia ha scelto: " + choice.titolo + " — " + itDate(fDate.value) + " alle " + fTime.value
+  };
+}
+
+function save(data){
+  try{ localStorage.setItem("sofia-ultima-scelta", JSON.stringify(data)); }catch(e){}
+}
+
+form.addEventListener("submit", function(e){
+  e.preventDefault();
+  if(!choice) return;
+
+  if(!fDate.value){ fieldError("Manca il giorno."); fDate.focus(); return; }
+  if(!fTime.value){ fieldError("Manca l'ora."); fTime.focus(); return; }
+
+  const data = payload();
+  save(data);
+
+  errBox.hidden = true;
+  noteEl.hidden = true;
+  sendBtn.disabled = true;
+  sendBtn.innerHTML = "";
+  sendBtn.appendChild(Object.assign(document.createElement("span"), { className:"spin" }));
+  sendBtn.appendChild(document.createTextNode("sto mandando"));
+
+  send(data).then(function(){
+    form.classList.add("is-sent");
+    setTimeout(function(){ goTo(5); }, RM ? 60 : 420);
+  }).catch(function(){
+    fails++;
+    sendBtn.disabled = false;
+    sendBtn.textContent = "Invia";
+    errBox.hidden = false;
+    errBox.innerHTML = "";
+    errBox.appendChild(document.createTextNode(
+      fails > 1
+        ? "Continua a non partire. Colpa mia, non tua: fai uno screenshot e mandamelo su WhatsApp, funziona uguale."
+        : "Uhm, non è partita. Non è colpa tua, è colpa della mia pagina."
+    ));
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "btn"; b.textContent = "Riprova";
+    b.addEventListener("click", function(){
+      errBox.hidden = true;
+      form.dispatchEvent(new Event("submit", { cancelable:true }));
+    });
+    errBox.appendChild(b);
+  });
+});
+
+function send(data){
+  if(!FORM_ENDPOINT){
+    console.warn("[per-sofia] FORM_ENDPOINT vuoto: la mail NON parte. Payload:", data);
+    return new Promise(function(res){ setTimeout(res, 550); });   // così il flusso è testabile
+  }
+  return fetch(FORM_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify(data)
+  }).then(function(r){
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    return true;
+  });
+}
+
+/* ------------------------------------------------------------
+   SCENA 5 — il countdown finale
+   ------------------------------------------------------------ */
+const finalEl = $("#final");
+function showFinal(){
+  const anni = num2word(ANNI_N);
+  finalEl.innerHTML = "";
+  if(MANCANO === 0){
+    finalEl.appendChild(document.createTextNode("E comunque i nostri " + anni + " anni sono oggi, giusto per dire."));
+  }else{
+    finalEl.appendChild(document.createTextNode("E tieniti pronta, perché " + (MANCANO === 1 ? "manca solo " : "mancano solo ")));
+    const b = document.createElement("b");
+    b.textContent = String(MANCANO);
+    finalEl.appendChild(b);
+    finalEl.appendChild(document.createTextNode(" giorn" + (MANCANO === 1 ? "o" : "i") + " ai nostri " + anni + " anni."));
+  }
+  requestAnimationFrame(function(){
+    setTimeout(function(){ finalEl.classList.add("is-in"); }, RM ? 60 : 900);
+  });
+}
+
+/* ------------------------------------------------------------
+   IL GATTINO — scappa dal dito / dal mouse.
+   Non copre mai il testo: sta fuori dal blocco di contenuto,
+   e se non c'è spazio sparisce.
+   ------------------------------------------------------------ */
+const cat = $("#cat");
+const catHint = $("#catHint");
+const CAT_W = MOBILE ? 58 : 74, CAT_H = Math.round(CAT_W * 0.92);
+cat.setAttribute("width", CAT_W); cat.setAttribute("height", CAT_H);
+
+let cx = 0, cy = 0, dir = 1, lastFlee = 0, idleTimer = null, hintShown = false;
+let bounds = { x0:0, x1:0, y0:0, y1:0 };
+
+function computeBounds(){
+  const pad = 14;
+  bounds.x0 = pad;
+  bounds.x1 = Math.max(pad, window.innerWidth - CAT_W - pad);
+  bounds.y0 = window.innerHeight * (MOBILE ? .55 : .5);
+  bounds.y1 = Math.max(bounds.y0, window.innerHeight - CAT_H - 18);
+}
+function contentRect(){
+  const s = scenes[current-1];
+  const inner = s ? s.querySelector(".scene__inner") : null;
+  if(!inner) return null;
+  const r = inner.getBoundingClientRect();
+  return { l:r.left-10, r:r.right+10, t:r.top-10, b:r.bottom+10 };
+}
+function free(x,y){
+  const c = contentRect();
+  if(!c) return true;
+  return !(x < c.r && x + CAT_W > c.l && y < c.b && y + CAT_H > c.t);
+}
+function place(x,y){
+  x = Math.min(bounds.x1, Math.max(bounds.x0, x));
+  y = Math.min(bounds.y1, Math.max(bounds.y0, y));
+  if(!free(x,y)){
+    const c = contentRect();
+    const alts = [ [bounds.x0, y], [bounds.x1, y], [x, bounds.y1], [x, bounds.y0] ];
+    if(c) alts.unshift([x, c.b + 6], [x, c.t - CAT_H - 6]);
+    let hit = null;
+    for(let i=0;i<alts.length;i++){
+      const ax = Math.min(bounds.x1, Math.max(bounds.x0, alts[i][0]));
+      const ay = Math.min(bounds.y1, Math.max(bounds.y0, alts[i][1]));
+      if(free(ax,ay)){ hit = [ax,ay]; break; }
+    }
+    if(!hit){ cat.classList.remove("is-on"); return; }
+    x = hit[0]; y = hit[1];
+  }
+  cx = x; cy = y;
+  cat.style.transform = "translate3d(" + Math.round(cx) + "px," + Math.round(cy) + "px,0) scaleX(" + dir + ")";
+  if(current >= 2) cat.classList.add("is-on");
+  if(catHint.classList.contains("is-on")) positionHint();
+}
+function layoutCat(){ computeBounds(); place(cx, cy); }
+
+function positionHint(){
+  const w = catHint.offsetWidth || 110;
+  let hx = cx + CAT_W/2 - w/2;
+  hx = Math.min(window.innerWidth - w - 12, Math.max(12, hx));
+  catHint.style.left = Math.round(hx) + "px";
+  catHint.style.top  = Math.round(Math.max(8, cy - 24)) + "px";
+}
+function showCatHint(){
+  if(hintShown || RM) return;
+  hintShown = true;
+  setTimeout(function(){
+    positionHint();
+    catHint.classList.add("is-on");
+    setTimeout(function(){ catHint.classList.remove("is-on"); }, 4600);
+  }, 1400);
+}
+
+function flee(px, py){
+  if(RM) return;
+  const now = performance.now();
+  if(now - lastFlee < 380) return;
+  const mx = cx + CAT_W/2, my = cy + CAT_H/2;
+  const dx = mx - px, dy = my - py;
+  const d = Math.hypot(dx, dy);
+  if(d > 150) return;
+  lastFlee = now;
+  catHint.classList.remove("is-on");
+  const a = Math.atan2(dy, dx) + rand(-.5,.5);
+  const j = rand(150, 230);
+  dir = Math.cos(a) >= 0 ? 1 : -1;
+  place(cx + Math.cos(a)*j, cy + Math.sin(a)*j);
+}
+function idle(){
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(function(){
+    if(!RM && current >= 2 && performance.now() - lastFlee > 2600){
+      const nx = cx + rand(-70,70);
+      dir = nx >= cx ? 1 : -1;
+      place(nx, cy + rand(-34,34));
+    }
+    idle();
+  }, rand(3600, 6200));
+}
+
+window.addEventListener("pointermove", function(e){ flee(e.clientX, e.clientY); }, { passive:true });
+window.addEventListener("touchmove", function(e){
+  const t = e.touches[0]; if(t) flee(t.clientX, t.clientY);
+}, { passive:true });
+window.addEventListener("pointerdown", function(e){ flee(e.clientX, e.clientY); }, { passive:true });
+window.addEventListener("resize", layoutCat);
+window.addEventListener("orientationchange", function(){ setTimeout(layoutCat, 250); });
+
+computeBounds();
+cx = window.innerWidth * (MOBILE ? .72 : .78);
+cy = bounds.y1 - 10;
+place(cx, cy);
+if(!RM) idle();
+
+/* ------------------------------------------------------------
+   Avviso per Meme (sparisce da solo appena riempi FORM_ENDPOINT)
+   ------------------------------------------------------------ */
+if(!FORM_ENDPOINT){
+  const w = $("#cfgWarn");
+  w.hidden = false;
+  w.innerHTML = 'Modalità prova: <code>FORM_ENDPOINT</code> è vuoto, la mail non parte. ' +
+                'Incolla l\'URL Formspree in cima allo script e questo avviso sparisce.';
+  w.addEventListener("click", function(){ w.hidden = true; });
+}
+
+})();
+</script>
+</body>
+</html>
