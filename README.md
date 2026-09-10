@@ -45,16 +45,19 @@ Ognuno ha intro, etichette e domande sue. Si cambiano tutti nell'oggetto `OPZION
 | Un viaggio | Quanto stiamo fuori? + Che aria tira? — più "Dove ti va di andare?" con 22 mete suggerite |
 | Sorprendimi tu | Quanto posso esagerare? · Poco / Il giusto / Esagera / Fai tu |
 
-### Il posto
+### Il posto — tarato su Milano
 
-Dove ha senso c'è un campo di testo per il luogo. Su "Un viaggio" ha una lista di mete
-suggerite (`datalist`); sugli altri è libero, perché non so in che città siete: se me lo dici,
-ci metto una lista vera di posti vostri.
+- **Serata** e **appuntamento**: 22 zone di Milano suggerite (Navigli, Brera, Isola, NoLo,
+  Porta Romana, Ticinese, Paolo Sarpi…). Può anche scrivere il nome del locale.
+- **Viaggio**: 28 mete da weekend raggiungibili da Milano (i laghi, Bergamo Alta,
+  Franciacorta, Portofino, le Cinque Terre, Bormio, Courmayeur, Verona, Bologna…).
+
+Il campo resta comunque libero: la lista è un suggerimento, non una gabbia.
 
 Appena scrive qualcosa compare **"cercalo su Maps ↗"**, che apre la ricerca già pronta in una
-scheda nuova. Non è l'API di Google Maps — quella vorrebbe una chiave e chiamate esterne, e
-questa pagina non ha dipendenze. È solo un link, ma fa lo stesso lavoro: lei guarda, sceglie,
-e scrive il nome nel campo.
+scheda nuova, con "Milano" aggiunto dove serve. Non è l'API di Google Maps — quella vorrebbe
+una chiave e chiamate esterne, e questa pagina non ha dipendenze. È solo un link, ma fa lo
+stesso lavoro: lei guarda, sceglie, e scrive il nome nel campo.
 
 Cambiano anche le etichette dei picker ("Che sera", "Si parte il", "Ti passo a prendere alle")
 e il suggerimento nel campo libero. Le risposte finiscono nella mail con la domanda per esteso:
@@ -123,5 +126,21 @@ il giorno dopo si aggiorna da solo, plurali compresi.
 - Se il browser blocca l'audio, il tastino mute sparisce e il resto funziona uguale.
 - Le scene avanzano solo al tocco. Mai un timer.
 - Rispetta `prefers-reduced-motion`.
-- Petali solo via `transform`/`opacity`: 24 su mobile, 33 nella scena finale, +10 nel pop-up del gioco.
-- Testata a 320, 375, 414px e su desktop.
+- Petali solo via `transform`/`opacity`: 34 su mobile (54 su desktop), +14 nella scena finale,
+  +16 nel pop-up del gioco.
+- **Rete di sicurezza sui petali**: dopo il contatore la pagina misura i fotogrammi veri per
+  un secondo e mezzo. Sopra i 40 fps non tocca niente; sotto, dirada i petali da sola (fino al
+  60% in meno). Così su un telefono in forma restano tutti, e su uno stanco la pagina non
+  diventa a scatti.
+
+## Test
+
+- **iPhone 13 su WebKit vero** (il motore di Safari, profilo dispositivo ufficiale 390×664):
+  26 controlli, tutti passati.
+- **Chromium** a 320/375/414/1280 e con `prefers-reduced-motion`: 63 controlli.
+- Le richieste a Formspree sono sempre intercettate: nessuna mail di prova spedita davvero.
+
+Quello che **non** si può verificare da qui: la fluidità reale su un iPhone. Questo container
+non ha GPU e disegna via software, quindi i numeri di fps non sono confrontabili (una pagina
+vuota fa 61 fps, la nostra 20 — su hardware vero quel carico lo fa la GPU senza fatica).
+La rete di sicurezza qui sopra esiste proprio per questo.

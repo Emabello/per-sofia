@@ -39,6 +39,7 @@ body{
   -webkit-tap-highlight-color: transparent;
 }
 button, input, textarea{ font:inherit; color:inherit; }
+button, .chip, .tile, .toy, .tap, a{ touch-action: manipulation; }
 [hidden]{ display:none !important; }   /* le regole qui sotto non devono batterlo */
 
 /* ============================================================
@@ -96,7 +97,6 @@ button, input, textarea{ font:inherit; color:inherit; }
   border-radius: 100% 0 100% 0;
   background: linear-gradient(135deg, #ffe0e5 0%, #f7aebb 55%, #ec8fa1 100%);
   opacity: var(--o);
-  will-change: transform, opacity;
   transition: opacity 1.2s ease;
   animation: sway var(--sway) ease-in-out infinite alternate;
 }
@@ -339,7 +339,7 @@ button, input, textarea{ font:inherit; color:inherit; }
   opacity:1; transform:none;
   transition: opacity .95s ease var(--d), transform .95s var(--ease) var(--d);
 }
-.letter .btn{ display:flex; margin:22px auto 0; opacity:0; transition: opacity .8s ease 2.6s; }
+.letter .btn{ display:flex; margin:22px auto 0; opacity:0; transition: opacity .8s ease 2.2s; }
 .letter.is-open .btn{ opacity:1; }
 
 /* --- scena 4: i quattro tile --- */
@@ -496,7 +496,12 @@ button, input, textarea{ font:inherit; color:inherit; }
 .btn--cat{ margin-top:0; min-height:46px; padding:0 22px; font-size:15px; }
 
 /* --- il pop-up --- */
-.game{ position:fixed; inset:0; z-index:25; }
+.game{
+  position:fixed; inset:0; z-index:25;
+  height:100vh; height:100dvh;          /* Safari: la barra che compare e sparisce */
+  touch-action: manipulation;
+  -webkit-user-select:none; user-select:none;
+}
 .game__scrim{ position:absolute; inset:0; background: rgba(255,243,234,.32); }
 .game__panel{
   position:absolute;
@@ -504,7 +509,7 @@ button, input, textarea{ font:inherit; color:inherit; }
   top: calc(clamp(46px, 9vh, 88px) + env(safe-area-inset-top));
   bottom: calc(clamp(46px, 9vh, 88px) + env(safe-area-inset-bottom));
   max-width:620px; margin-inline:auto;
-  display:flex; flex-direction:column; gap:10px;
+  display:flex; flex-direction:column; gap:12px;
   padding:14px 15px;
   border-radius:26px;
   /* niente blur: i petali dello sfondo devono restare nitidi */
@@ -545,7 +550,7 @@ button, input, textarea{ font:inherit; color:inherit; }
   background: rgba(255,255,255,.12);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.5);
 }
-.toys{ flex:none; display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
+.toys{ flex:none; display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:5px; }
 .toy{
   display:flex; flex-direction:column; align-items:center; gap:5px;
   padding:10px 3px; border:0; border-radius:16px; cursor:pointer;
@@ -565,6 +570,7 @@ button, input, textarea{ font:inherit; color:inherit; }
 .game__cat{
   position:absolute; left:0; top:0; width:var(--kw,96px);
   cursor:pointer; touch-action:none; will-change:transform;
+  -webkit-touch-callout:none;           /* niente menu col dito tenuto premuto */
 }
 .ty{
   position:absolute; left:0; top:0; display:block;
@@ -954,11 +960,36 @@ function makePetal(fast){
   return p;
 }
 (function initPetals(){
-  const n = RM ? 8 : (MOBILE ? 24 : 38);
+  const n = RM ? 10 : (MOBILE ? 34 : 54);
   const frag = document.createDocumentFragment();
   for(let i=0;i<n;i++) frag.appendChild(makePetal(false));
   petalsBox.appendChild(frag);
 })();
+
+/* Quanti petali regge questo telefono.
+   Misuro i fotogrammi veri per un attimo: se fatica, li dirado da solo.
+   Cosi' su un telefono in forma restano tanti, e su uno stanco la pagina
+   non diventa a scatti. */
+let petaliRidotti = 0;
+function tarapetali(){
+  if(RM) return;
+  setTimeout(avvia, 2600);            // prima lascio finire il contatore
+  function avvia(){
+  let n = 0, t0 = -1;
+  requestAnimationFrame(function step(t){
+    if(t0 < 0){ t0 = t; requestAnimationFrame(step); return; }
+    n++;
+    if(t - t0 < 1500){ requestAnimationFrame(step); return; }
+    const fps = n / ((t - t0)/1000);
+    if(fps >= 40) return;             // un iPhone in salute non ci arriva mai
+    petaliRidotti = fps < 25 ? 0.6 : 0.35;
+    const tutti = $$(".petal", petalsBox);
+    const quanti = Math.floor(tutti.length * petaliRidotti);
+    for(let i=0;i<quanti;i++) tutti[i].remove();
+  });
+  }
+}
+function quota(n){ return Math.max(3, Math.round(n * (1 - petaliRidotti))); }
 
 function petalsSoft(on){ petalsBox.classList.toggle("is-soft", !!on); }
 function petalsBurst(){
@@ -966,11 +997,11 @@ function petalsBurst(){
   petalsBox.classList.remove("is-soft");
   petalsBox.classList.add("is-burst");
   const frag = document.createDocumentFragment();
-  for(let i=0;i<18;i++) frag.appendChild(makePetal(true));   // il momento di pioggia
+  for(let i=0, k = quota(MOBILE ? 22 : 30); i<k; i++) frag.appendChild(makePetal(true));  // il momento di pioggia
   burstBox.appendChild(frag);
   // e poi qualcuno resta a cadere, per sempre, intorno al gattino
   const keep = document.createDocumentFragment();
-  for(let i=0, k = MOBILE ? 9 : 14; i<k; i++) keep.appendChild(makePetal(false));
+  for(let i=0, k = quota(MOBILE ? 14 : 22); i<k; i++) keep.appendChild(makePetal(false));
   petalsBox.appendChild(keep);
   setTimeout(function(){ burstBox.innerHTML = ""; }, 8500);
 }
@@ -1224,6 +1255,7 @@ function unlock(){
   unlocked = true;
   Music.start();
   goTo(2);
+  tarapetali();
 }
 $("#s1").addEventListener("click", unlock);
 $("#startBtn").addEventListener("click", function(e){ e.stopPropagation(); unlock(); });
@@ -1279,7 +1311,7 @@ envBtn.addEventListener("click", function(){
         requestAnimationFrame(function(){ letter.classList.add("is-open"); layoutCat(); });
       });
     }, RM ? 0 : 420);
-  }, RM ? 120 : 1000);
+  }, RM ? 120 : 880);
 });
 
 /* ------------------------------------------------------------
@@ -1291,7 +1323,8 @@ const OPZIONI = {
     intro: "Al posto ci penso io. Tu dimmi solo che fame hai.",
     labDate: "Che sera", labTime: "A che ora",
     msg: "tipo: non troppo tardi che lavoro",
-    posto: { id:"posto", label:"Un posto in mente?", ph:"il nome, o la zona" },
+    posto: { id:"posto", label:"Un posto o una zona?", ph:"Navigli, Isola… o il nome del locale",
+             maps:" Milano", list:["Navigli","Brera","Isola","Porta Romana","Porta Venezia","NoLo","Ticinese","Corso Como","Arco della Pace","Sempione","Paolo Sarpi","Città Studi","Lambrate","Porta Nuova","Duomo","Solari","Washington","Bicocca","Porta Genova","Lodi","Loreto","Bovisa"] },
     extra: [{ id:"fame", label:"Che fame abbiamo?",
               opts:["Pizza","Sushi","Qualcosa di carino","Scegli tu"] }]
   },
@@ -1299,7 +1332,8 @@ const OPZIONI = {
     intro: "Dove andiamo non te lo dico. Dimmi solo quando sei libera.",
     labDate: "Che giorno", labTime: "Ti passo a prendere alle",
     msg: "tipo: comoda o vestita bene?",
-    posto: { id:"ritrovo", label:"Da dove ti passo a prendere?", ph:"casa tua, il lavoro…" },
+    posto: { id:"ritrovo", label:"Da dove ti passo a prendere?", ph:"casa tua, il lavoro, una zona…",
+             maps:" Milano", list:["Navigli","Brera","Isola","Porta Romana","Porta Venezia","NoLo","Ticinese","Corso Como","Arco della Pace","Sempione","Paolo Sarpi","Città Studi","Lambrate","Porta Nuova","Duomo","Solari","Washington","Bicocca","Porta Genova","Lodi","Loreto","Bovisa"] },
     extra: [{ id:"durata", label:"Quanto tempo ho?",
               opts:["Un paio d'ore","Tutto il pomeriggio","Fino a sera","Decidi tu"] }]
   },
@@ -1307,10 +1341,8 @@ const OPZIONI = {
     intro: "Fuori città, e si torna quando ci pare.",
     labDate: "Si parte il", labTime: "Verso le",
     msg: "tipo: niente sveglie all'alba",
-    posto: { id:"meta", label:"Dove ti va di andare?", ph:"una città, o il mare",
-             list:["Bologna","Firenze","Verona","Siena","Lucca","Genova","Portofino","Cinque Terre",
-                   "Lago di Como","Lago di Garda","Dolomiti","Trieste","Torino","Venezia","Ravenna",
-                   "Urbino","Assisi","Matera","Napoli","Procida","Rimini","Perugia"] },
+    posto: { id:"meta", label:"Dove ti va di andare?", ph:"un lago, la montagna, il mare…",
+             list:["Lago di Como","Lago di Garda","Lago Maggiore","Lago d'Orta","Stresa","Sirmione","Bergamo Alta","Brescia","Franciacorta","Cremona","Mantova","Pavia","Verona","Torino","Genova","Portofino","Santa Margherita","Sestri Levante","Cinque Terre","Bologna","Parma","Firenze","Venezia","Bormio","Livigno","Courmayeur","Cervinia","Dolomiti"] },
     extra: [
       { id:"quanto", label:"Quanto stiamo fuori?", opts:["Una notte","Un weekend","Tre giorni buoni"] },
       { id:"dove",   label:"Che aria tira?",       opts:["Mare","Montagna","Una città","Sorprendimi"] }
@@ -1398,7 +1430,8 @@ function buildForm(cfg){
     inp.addEventListener("input", function(){
       const v = inp.value.trim();
       a.hidden = v.length < 2;
-      if(!a.hidden) a.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(v);
+      if(!a.hidden) a.href = "https://www.google.com/maps/search/?api=1&query=" +
+          encodeURIComponent(v + (cfg.posto.maps || ""));
     });
   }
 }
@@ -1823,7 +1856,7 @@ const Gioco = (function(){
       if(!tgt.on){ setState("idle"); pickWander(); }
       else{
         tx = tgt.x; ty = tgt.y;
-        sp = tgt.kind === "cibo" ? 200 : 330;
+        sp = tgt.kind === "cibo" ? 240 : 430;
         const d = D(cat.x,cat.y,tx,ty);
         if(d < (tgt.kind === "cibo" ? 44 : 50)){
           if(tgt.kind === "cibo") mangia();
@@ -1831,8 +1864,8 @@ const Gioco = (function(){
         }
       }
     }else if(cat.st === "pounce"){
-      if(cat.t > 0.52){ preso(); }
-      else if(cat.t > 0.2){ tx = tgt.x; ty = tgt.y; sp = 540; }
+      if(cat.t > 0.4){ preso(); }
+      else if(cat.t > 0.15){ tx = tgt.x; ty = tgt.y; sp = 620; }
     }else if(cat.st === "eat"){
       if(cat.t > 2.2) fineMangia();
     }else if(cat.st === "purr"){
@@ -1843,7 +1876,7 @@ const Gioco = (function(){
     const dx = tx - cat.x, dy = ty - cat.y;
     const d = Math.hypot(dx, dy) || 1;
     const wx = sp ? dx/d*sp : 0, wy = sp ? dy/d*sp : 0;
-    const k = Math.min(1, dt * (sp > 400 ? 11 : 6));
+    const k = Math.min(1, dt * (sp > 400 ? 12 : 7));
     cat.vx += (wx - cat.vx) * k;
     cat.vy += (wy - cat.vy) * k;
     cat.x += cat.vx * dt;
@@ -1861,7 +1894,7 @@ const Gioco = (function(){
     catEl.classList.toggle("is-walking", cammina);
 
     let sx = 1, sy = 1, bob = 0, rot = 0;
-    if(cat.st === "pounce" && cat.t <= 0.2){ sx = 1.18; sy = 0.84; }
+    if(cat.st === "pounce" && cat.t <= 0.15){ sx = 1.18; sy = 0.84; }
     else if(cat.st === "pounce"){ sx = 0.88; sy = 1.16; }
     else if(cat.st === "purr"){ const b2 = 1 + Math.sin(cat.t*6.5)*0.035; sx = b2; sy = b2; }
     if(cammina && !RM){ bob = Math.sin(cat.t*17)*4; rot = clamp(cat.vx/70, -1, 1) * 6; }
@@ -1913,17 +1946,22 @@ const Gioco = (function(){
     if(toy === "cibo") setSay("Sta arrivando.");
   }
 
-  layer.addEventListener("pointerdown", punta);
+  let trascina = false;
+  layer.addEventListener("pointerdown", function(e){ trascina = true; punta(e); });
   layer.addEventListener("pointermove", function(e){
-    if(toy === "laser" || toy === "piuma"){
-      if(e.buttons || e.pointerType === "mouse") punta(e);
-    }
+    if(toy !== "laser" && toy !== "piuma") return;
+    if(trascina || e.pointerType === "mouse") punta(e);
   }, { passive:true });
+  layer.addEventListener("pointerup",     function(){ trascina = false; });
+  layer.addEventListener("pointercancel", function(){ trascina = false; });
 
   catEl.addEventListener("pointerdown", function(e){ e.stopPropagation(); coccola(); });
 
   $$(".toy", $("#toys")).forEach(function(b){
     b.addEventListener("click", function(){
+      // iOS aggancia il tocco al pulsante vicino: se il gioco e' gia' questo,
+      // non azzerare niente, altrimenti un tocco sul campo manda tutto all'aria
+      if(b.dataset.toy === toy) return;
       $$(".toy", $("#toys")).forEach(function(o){ o.classList.remove("is-on"); });
       b.classList.add("is-on");
       toy = b.dataset.toy;
@@ -1954,7 +1992,7 @@ const Gioco = (function(){
 
     if(!gPetals.childElementCount && !RM){
       const f = document.createDocumentFragment();
-      for(let i=0, n = MOBILE ? 10 : 16; i<n; i++) f.appendChild(makePetal(false));
+      for(let i=0, n = quota(MOBILE ? 16 : 26); i<n; i++) f.appendChild(makePetal(false));
       gPetals.appendChild(f);
     }
 
